@@ -48,7 +48,7 @@
                 <RowDefinition Height="Auto" /> <!-- TextBlock -->
                 <RowDefinition Height="Auto" /> <!-- Buttons -->
             </Grid.RowDefinitions>
-            <TextBlock Text="It's recommended to use metadata plugins to get more data on any added game(s)." 
+            <TextBlock Text="It's recommended to use metadata plugins to get more data on any added game(s)."
                TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,10" Grid.Row="0">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}" />

@@ -70,7 +70,7 @@
                         <Setter Property="dd:DragDrop.IsDropTarget" Value="True"/>
                         <Setter Property="HorizontalAlignment" Value="Left" />
                         <Setter Property="Margin" Value="0,0,10,0"/>
-                        <Setter Property="Grid.Row" Value="1"/>                        
+                        <Setter Property="Grid.Row" Value="1"/>
                     </Style>
                 </Grid.Resources>
 

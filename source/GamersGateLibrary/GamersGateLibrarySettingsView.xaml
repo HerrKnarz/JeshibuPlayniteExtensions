@@ -8,7 +8,7 @@
              d:DataContext="{d:DesignInstance Type=gamersgate:GamersGateLibrarySettingsViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="600">
-    
+
     <ScrollViewer Margin="20">
         <StackPanel ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <TextBlock TextWrapping="Wrap">GamersGate uses CloudFlare to ward off scrapers such as us. It frequently blocks scraping attempts with CAPTCHAs, requiring user intervention. For this reason, the import process opens a web view and requires your presence and attention. You have 60 seconds to move from any CAPTCHA or login page to the intended web page during import. Do not close the web view during import.</TextBlock>

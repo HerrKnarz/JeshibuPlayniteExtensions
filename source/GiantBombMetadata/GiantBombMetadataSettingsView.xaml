@@ -123,10 +123,10 @@
 
                 <ComboBox Grid.Row="11" SelectedItem="{Binding Settings.Themes.ImportTarget}"/>
                 <TextBox Grid.Row="11" Text="{Binding Settings.Themes.Prefix}"/>
-                
+
                 <ComboBox Grid.Row="12" SelectedItem="{Binding Settings.Genres.ImportTarget}"/>
                 <TextBox Grid.Row="12" Text="{Binding Settings.Genres.Prefix}"/>
-                
+
                 <ComboBox Grid.Row="13" SelectedItem="{Binding Settings.Franchises.ImportTarget}"/>
                 <TextBox Grid.Row="13" Text="{Binding Settings.Franchises.Prefix}"/>
             </Grid>
