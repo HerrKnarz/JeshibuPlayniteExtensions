@@ -52,8 +52,7 @@ public abstract class BulkGamePropertyAssigner<TSearchItem, TApprovalPromptViewM
         if (selectedItem == null)
             return;
 
-        List<GameDetails> associatedGames = null;
-        Ui.ShowProgress(a => { associatedGames = DataSource.GetDetails(selectedItem, a)?.ToList(); }, GetGameDownloadProgressOptions(selectedItem));
+        var associatedGames = GetGames(selectedItem)?.ToList();
 
         if (associatedGames == null)
             return;
@@ -64,6 +63,13 @@ public abstract class BulkGamePropertyAssigner<TSearchItem, TApprovalPromptViewM
             return;
 
         UpdateGames(viewModel);
+    }
+
+    protected virtual IEnumerable<GameDetails> GetGames(TSearchItem selectedItem)
+    {
+        List<GameDetails> associatedGames = [];
+        Ui.ShowProgress(a => associatedGames = DataSource.GetDetails(selectedItem, a).ToList(), GetGameDownloadProgressOptions(selectedItem));
+        return associatedGames;
     }
 
     public virtual TSearchItem SelectGameProperty() => Ui.SelectGameProperty(DataSource);
@@ -80,7 +86,7 @@ public abstract class BulkGamePropertyAssigner<TSearchItem, TApprovalPromptViewM
         return null;
     }
 
-    private GamePropertyImportViewModel PromptGamePropertyImportUserApproval(TSearchItem selectedItem, List<GameDetails> gamesToMatch)
+    protected GamePropertyImportViewModel PromptGamePropertyImportUserApproval(TSearchItem selectedItem, List<GameDetails> gamesToMatch)
     {
         var importSetting = GetPropertyImportSetting(selectedItem, out string propName);
         if (importSetting == null)
@@ -179,7 +185,7 @@ public abstract class BulkGamePropertyAssigner<TSearchItem, TApprovalPromptViewM
         return matchingGames;
     }
 
-    private void UpdateGames(GamePropertyImportViewModel viewModel)
+    protected void UpdateGames(GamePropertyImportViewModel viewModel)
     {
         using var bufferedUpdate = Database.BufferedUpdate();
         var dbItem = GetDatabaseObject(viewModel);
@@ -301,6 +307,7 @@ public class BulkPropertyUserInterface(IPlayniteAPI playniteApi)
 {
     protected readonly ILogger logger = LogManager.GetLogger();
     protected bool windowSizedDown;
+    protected IPlayniteAPI PlayniteApi { get; } = playniteApi;
     public bool AllowEmptySearchQuery { get; set; } = false;
     public string DefaultSearch { get; set; } = null;
 
@@ -323,7 +330,7 @@ public class BulkPropertyUserInterface(IPlayniteAPI playniteApi)
 
     public virtual TSearchItem SelectGameProperty<TSearchItem>(ISearchableDataSourceWithDetails<TSearchItem, IEnumerable<GameDetails>> dataSource)
     {
-        var selectedItem = playniteApi.Dialogs.ChooseItemWithSearch(null, a =>
+        var selectedItem = PlayniteApi.Dialogs.ChooseItemWithSearch(null, a =>
         {
             var output = new List<GenericItemOption>();
 
@@ -349,7 +356,7 @@ public class BulkPropertyUserInterface(IPlayniteAPI playniteApi)
 
     public virtual GamePropertyImportViewModel SelectGames<TApprovalPromptViewModel>(TApprovalPromptViewModel viewModel) where TApprovalPromptViewModel : GamePropertyImportViewModel, new()
     {
-        var window = playniteApi.Dialogs.CreateWindow(new() { ShowCloseButton = true, ShowMaximizeButton = true, ShowMinimizeButton = false });
+        var window = PlayniteApi.Dialogs.CreateWindow(new() { ShowCloseButton = true, ShowMaximizeButton = true, ShowMinimizeButton = false });
         var control = GetBulkPropertyImportView(window, viewModel);
         window.Content = control;
         window.SizeToContent = SizeToContent.WidthAndHeight;
@@ -363,12 +370,17 @@ public class BulkPropertyUserInterface(IPlayniteAPI playniteApi)
 
     protected virtual UserControl GetBulkPropertyImportView<TApprovalPromptViewModel>(Window window, TApprovalPromptViewModel viewModel) where TApprovalPromptViewModel : GamePropertyImportViewModel, new()
     {
-        throw new NotImplementedException();
-        //return new GamePropertyImportView(window) { DataContext = viewModel };
+        return new GamePropertyImportView(window) { DataContext = viewModel };
     }
 
-    public virtual void ShowProgress(Action<GlobalProgressActionArgs> action, GlobalProgressOptions progressOptions) => playniteApi.Dialogs.ActivateGlobalProgress(action, progressOptions);
-    public virtual void AddNotification(string id, string text, NotificationType type) => playniteApi.Notifications.Add(id, text, type);
-    public virtual void ShowDialog(string bodyText, string caption, MessageBoxButton button, MessageBoxImage icon) => playniteApi.Dialogs.ShowMessage(bodyText, caption, button, icon);
-    public bool GameIsInCurrentFilter(Game game) => playniteApi.MainView.FilteredGames.Contains(game);
+    public virtual void ShowProgress(Action<GlobalProgressActionArgs> action, GlobalProgressOptions progressOptions) => PlayniteApi.Dialogs.ActivateGlobalProgress(action, progressOptions);
+    public virtual void AddNotification(string id, string text, NotificationType type) => PlayniteApi.Notifications.Add(id, text, type);
+    public virtual void ShowDialog(string bodyText, string caption, MessageBoxButton button, MessageBoxImage icon) => PlayniteApi.Dialogs.ShowMessage(bodyText, caption, button, icon);
+    public virtual bool GameIsInCurrentFilter(Game game) => PlayniteApi.MainView.FilteredGames.Contains(game);
+
+    public virtual TItem ChooseItemWithSearch<TItem>(List<GenericItemOption<TItem>> items, Func<string, List<GenericItemOption>> searchFunction, string defaultSearch = null, string caption = null) where TItem : class
+    {
+        var chosenItem = PlayniteApi.Dialogs.ChooseItemWithSearch(items?.Cast<GenericItemOption>().ToList(), searchFunction, defaultSearch, caption) as GenericItemOption<TItem>;
+        return chosenItem?.Item;
+    }
 }

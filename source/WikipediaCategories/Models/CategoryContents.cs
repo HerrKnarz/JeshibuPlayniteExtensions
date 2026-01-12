@@ -4,6 +4,6 @@ namespace WikipediaCategories.Models;
 
 public class CategoryContents
 {
-    public List<string> Subcategories { get; } = [];
-    public List<string> Articles { get; } = [];
+    public List<string> SubcategoryNames { get; } = [];
+    public List<string> ArticleNames { get; } = [];
 }

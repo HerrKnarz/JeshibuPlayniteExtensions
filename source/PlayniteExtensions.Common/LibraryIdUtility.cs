@@ -41,7 +41,7 @@ public readonly struct DbId(ExternalDatabase database, string id) : IEquatable<D
     public static DbId TvTropes(string id) => new(ExternalDatabase.TvTropes, id);
     public static DbId RAWG(string id) => new(ExternalDatabase.RAWG, id);
     public static DbId Wikipedia(string id) => new(ExternalDatabase.Wikipedia, id);
-
+    public static DbId Wikipedia(string lang, string article) => new(ExternalDatabase.Wikipedia, $"{lang}/{article}");
 }
 
 public interface IExternalDatabaseIdUtility
@@ -168,9 +168,9 @@ public class WikipediaIdUtility : SingleExternalDatabaseIdUtility
         if(!match.Success)
             return new(ExternalDatabase.None, null);
 
-        var idString = WebUtility.UrlDecode(match.Groups["article"].Value);
+        var article = WebUtility.UrlDecode(match.Groups["article"].Value);
         var lang = match.Groups["lang"].Value;
-        return DbId.Wikipedia($"{lang}/{idString}");
+        return DbId.Wikipedia(lang, article);
     }
 
     public static Tuple<string, string> GetLanguageAndIdFromDbId(DbId dbId)
@@ -191,7 +191,11 @@ public class WikipediaIdUtility : SingleExternalDatabaseIdUtility
         return ToWikipediaUrl(langAndId.Item1, langAndId.Item2);
     }
 
-    public static string ToWikipediaUrl(string lang, string name) => $"https://{lang}.wikipedia.org/wiki/{name?.Replace(' ', '_')}";
+    public static string ToWikipediaUrl(string lang, string name)
+    {
+        var slug = WebUtility.UrlEncode(name?.Replace(' ', '_'));
+        return $"https://{lang}.wikipedia.org/wiki/{slug}";
+    }
 }
 
 public class AggregateExternalDatabaseUtility : IExternalDatabaseIdUtility

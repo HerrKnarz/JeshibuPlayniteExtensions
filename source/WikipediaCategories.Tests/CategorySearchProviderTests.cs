@@ -24,8 +24,8 @@ public class CategorySearchProviderTests
         _downloader.FilesByUrl.Add(_api.GetCategoryMembersUrl(categoryName), "Resources/details-category-11th-century.json");
         //_downloader.FilesByUrl.Add(_api.GetCategoryMembersUrl("Category:Video games set in 11th-century Abbasid Caliphate"), "Resources/details-category-11th-century-subcat.json");
         var categoryContents = _categorySearchProvider.GetCategoryContents(categoryName, CancellationToken.None);
-        Assert.Equal(13, categoryContents.Articles.Count);
-        Assert.DoesNotContain("Sly Cooper: Thieves in Time", categoryContents.Articles);
-        Assert.Single(categoryContents.Subcategories);
+        Assert.Equal(13, categoryContents.ArticleNames.Count);
+        Assert.DoesNotContain("Sly Cooper: Thieves in Time", categoryContents.ArticleNames);
+        Assert.Single(categoryContents.SubcategoryNames);
     }
 }

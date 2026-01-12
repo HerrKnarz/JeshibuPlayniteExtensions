@@ -17,9 +17,12 @@ public interface IWikipediaCategorySearchProvider : IBulkPropertyImportDataSourc
 
 public class WikipediaCategorySearchProvider(WikipediaApi api) : IWikipediaCategorySearchProvider
 {
+    public WikipediaApi Api { get; } = api;
+    private readonly ILogger _logger = LogManager.GetLogger();
+
     public IEnumerable<WikipediaSearchResult> Search(string query, CancellationToken cancellationToken = default)
     {
-        return api.Search(query, WikipediaNamespace.Category, cancellationToken);
+        return Api.Search(query, WikipediaNamespace.Category, cancellationToken);
     }
 
     public GenericItemOption<WikipediaSearchResult> ToGenericItemOption(WikipediaSearchResult item) => new(item) { Name = item.Name };
@@ -35,7 +38,7 @@ public class WikipediaCategorySearchProvider(WikipediaApi api) : IWikipediaCateg
         if (depth >= MaxDepth)
             return output;
 
-        var categoryMembers = api.GetCategoryMembers(rootCategoryName, cancellationToken);
+        var categoryMembers = Api.GetCategoryMembers(rootCategoryName, cancellationToken);
         foreach (var categoryMember in categoryMembers)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -72,7 +75,7 @@ public class WikipediaCategorySearchProvider(WikipediaApi api) : IWikipediaCateg
             output.Add(new()
             {
                 Names = [displayTitle],
-                Url = WikipediaIdUtility.ToWikipediaUrl(api.WikipediaLocale, pageName),
+                Url = WikipediaIdUtility.ToWikipediaUrl(Api.WikipediaLocale, pageName),
             });
         }
     }
@@ -81,7 +84,7 @@ public class WikipediaCategorySearchProvider(WikipediaApi api) : IWikipediaCateg
     {
         var output = new CategoryContents();
 
-        var categoryMembers = api.GetCategoryMembers(categoryName, cancellationToken);
+        var categoryMembers = Api.GetCategoryMembers(categoryName, cancellationToken);
         foreach (var categoryMember in categoryMembers)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -90,10 +93,13 @@ public class WikipediaCategorySearchProvider(WikipediaApi api) : IWikipediaCateg
             switch ((WikipediaNamespace)categoryMember.ns)
             {
                 case WikipediaNamespace.Article:
-                    output.Articles.Add(categoryMember.title);
+                    output.ArticleNames.Add(categoryMember.title);
                     break;
                 case WikipediaNamespace.Category:
-                    output.Subcategories.Add(categoryMember.title);
+                    output.SubcategoryNames.Add(categoryMember.title);
+                    break;
+                default:
+                    _logger.Info($"Unknown wikipedia namespace: {categoryMember.ns} ({categoryMember.title})");
                     break;
             }
         }
