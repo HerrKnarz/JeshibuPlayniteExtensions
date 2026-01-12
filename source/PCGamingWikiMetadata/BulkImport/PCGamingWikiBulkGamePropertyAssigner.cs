@@ -12,15 +12,15 @@ namespace PCGamingWikiMetadata.BulkImport;
 
 internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<PCGamingWikiSelectedValues, GamePropertyImportViewModel>
 {
-    private readonly PCGamingWikiMetadataSettings settings;
-    private readonly PCGamingWikiPropertySearchProvider pcgwDataSource;
+    private readonly PCGamingWikiMetadataSettings _settings;
+    private readonly PCGamingWikiPropertySearchProvider _pcgwDataSource;
     private readonly PCGamingWikiBulkImportUserInterface _ui;
 
     public PCGamingWikiBulkGamePropertyAssigner(IPlayniteAPI playniteApi, PCGamingWikiMetadataSettings settings, IExternalDatabaseIdUtility databaseIdUtility, PCGamingWikiPropertySearchProvider dataSource, IPlatformUtility platformUtility, int maxDegreeOfParallelism = 8)
-        : base(playniteApi.Database, new(playniteApi){AllowEmptySearchQuery = true}, dataSource, platformUtility, databaseIdUtility, ExternalDatabase.PCGamingWiki, maxDegreeOfParallelism)
+        : base(playniteApi.Database, new(playniteApi) { AllowEmptySearchQuery = true }, dataSource, platformUtility, databaseIdUtility, ExternalDatabase.PCGamingWiki, maxDegreeOfParallelism)
     {
-        this.settings = settings;
-        pcgwDataSource = dataSource;
+        _settings = settings;
+        _pcgwDataSource = dataSource;
         _ui = new(playniteApi);
     }
 
@@ -55,7 +55,7 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
     {
         var selectedItem = _ui.ChooseItemWithSearch<ItemCount>(null, query =>
         {
-            var counts = pcgwDataSource.GetCounts(selectedPropertyCategory.FieldInfo, query);
+            var counts = _pcgwDataSource.GetCounts(selectedPropertyCategory.FieldInfo, query);
             var options = counts.Select(c => new GenericItemOption<ItemCount>(c) { Name = GetItemDisplayName(selectedPropertyCategory.FieldInfo, c) }).ToList<GenericItemOption>();
             return options;
         });
@@ -66,7 +66,7 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
         return selectedPropertyCategory;
     }
 
-    private string GetItemDisplayName(CargoFieldInfo field, ItemCount itemCount)
+    private static string GetItemDisplayName(CargoFieldInfo field, ItemCount itemCount)
     {
         return $"{itemCount.Value.TrimStart(field.PageNamePrefix)} ({itemCount.Count})";
     }
@@ -75,7 +75,7 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
     {
         try
         {
-            var counts = pcgwDataSource.GetCounts(selectedPropertyCategory.FieldInfo, null).ToList();
+            var counts = _pcgwDataSource.GetCounts(selectedPropertyCategory.FieldInfo, null).ToList();
             var items = counts.Select(c => new SelectableStringViewModel
             {
                 Value = c.Value,
@@ -98,10 +98,10 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
         }
     }
 
-    protected override IEnumerable<PotentialLink> GetPotentialLinks(PCGamingWikiSelectedValues searchItem)
-    {
-        yield return new(MetadataProviderName, gameDetails => gameDetails.Url, ContainsUrl);
-    }
+    protected override IEnumerable<PotentialLink> GetPotentialLinks(PCGamingWikiSelectedValues searchItem) =>
+    [
+        new(MetadataProviderName, gameDetails => gameDetails.Url, ContainsUrl)
+    ];
 
     private bool ContainsUrl(IEnumerable<Link> links, string url)
     {
@@ -116,9 +116,10 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
             if (gId.Database != ExternalDatabase.PCGamingWiki)
                 continue;
 
-            if(string.Equals(gdId, gId.Id, StringComparison.InvariantCultureIgnoreCase))
+            if (string.Equals(gdId, gId.Id, StringComparison.InvariantCultureIgnoreCase))
                 return true;
         }
+
         return false;
     }
 
@@ -128,7 +129,7 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
 
     protected override PropertyImportSetting GetPropertyImportSetting(PCGamingWikiSelectedValues searchItem, out string name)
     {
-        var p = settings.AddTagPrefix ? GetPrefix(searchItem.FieldInfo) : null;
+        var p = _settings.AddTagPrefix ? GetPrefix(searchItem.FieldInfo) : null;
         var n = GetTagName(searchItem);
         name = $"{p} {n}".Trim();
         return new() { ImportTarget = searchItem.FieldInfo.PreferredField };
@@ -137,8 +138,8 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
     private string GetTagName(PCGamingWikiSelectedValues searchItem)
     {
         return searchItem.FieldInfo.FieldType == CargoFieldType.String
-         ? searchItem.FieldInfo.FieldDisplayName
-         : searchItem.SelectedValues.FirstOrDefault().TrimStart(searchItem.FieldInfo.PageNamePrefix);
+            ? searchItem.FieldInfo.FieldDisplayName
+            : searchItem.SelectedValues.FirstOrDefault().TrimStart(searchItem.FieldInfo.PageNamePrefix);
     }
 
     private string GetPrefix(CargoFieldInfo fieldInfo)
@@ -147,15 +148,15 @@ internal class PCGamingWikiBulkGamePropertyAssigner : BulkGamePropertyAssigner<P
         {
             CargoTables.Names.GameInfoBox => fieldInfo.Field switch
             {
-                "Monetization" => settings.TagPrefixMonetization,
-                "Microtransactions" => settings.TagPrefixMicrotransactions,
-                "Pacing" => settings.TagPrefixPacing,
-                "Perspectives" => settings.TagPrefixPerspectives,
-                "Controls" => settings.TagPrefixControls,
-                "Vehicles" => settings.TagPrefixVehicles,
-                "Themes" => settings.TagPrefixThemes,
-                "Engines" => settings.TagPrefixEngines,
-                "Art_styles" => settings.TagPrefixArtStyles,
+                "Monetization" => _settings.TagPrefixMonetization,
+                "Microtransactions" => _settings.TagPrefixMicrotransactions,
+                "Pacing" => _settings.TagPrefixPacing,
+                "Perspectives" => _settings.TagPrefixPerspectives,
+                "Controls" => _settings.TagPrefixControls,
+                "Vehicles" => _settings.TagPrefixVehicles,
+                "Themes" => _settings.TagPrefixThemes,
+                "Engines" => _settings.TagPrefixEngines,
+                "Art_styles" => _settings.TagPrefixArtStyles,
                 _ => null,
             },
             _ => fieldInfo.FieldType switch

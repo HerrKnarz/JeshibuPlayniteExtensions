@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace PlayniteExtensions.Metadata.Common;
+namespace PCGamingWikiMetadata.BulkImport;
 
 /// <summary>
 /// Interaction logic for SelectStringsView.xaml

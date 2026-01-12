@@ -19,7 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)IImageData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IGameSearchResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ISearchableDataSource.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SelectStringsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\GamePropertyImportView.xaml.cs">
       <DependentUpon>GamePropertyImportView.xaml</DependentUpon>
@@ -30,7 +29,5 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Compile Include="$(MSBuildThisFileDirectory)Views\SelectStringsView.xaml.cs" />
-    <Page Include="$(MSBuildThisFileDirectory)Views\SelectStringsView.xaml" />
   </ItemGroup>
 </Project>

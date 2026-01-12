@@ -30,10 +30,4 @@ public class PCGamingWikiBulkImportUserInterface : BulkPropertyUserInterface
         bool? dialogResult = window.ShowDialog();
         return dialogResult == true ? vm : null;
     }
-
-    public TItem ChooseItemWithSearch<TItem>(List<GenericItemOption<TItem>> items, Func<string, List<GenericItemOption>> searchFunction, string defaultSearch = null, string caption = null) where TItem : class
-    {
-        var chosenItem = _playniteApi.Dialogs.ChooseItemWithSearch(items?.Cast<GenericItemOption>().ToList(), searchFunction, defaultSearch, caption) as GenericItemOption<TItem>;
-        return chosenItem?.Item;
-    }
 }

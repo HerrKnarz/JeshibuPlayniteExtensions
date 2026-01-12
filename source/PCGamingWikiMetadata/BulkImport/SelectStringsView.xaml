@@ -1,11 +1,11 @@
-﻿<UserControl x:Class="PlayniteExtensions.Metadata.Common.SelectStringsView"
+﻿<UserControl x:Class="PCGamingWikiMetadata.BulkImport.SelectStringsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:pecm="clr-namespace:PlayniteExtensions.Metadata.Common"
+             xmlns:bulkImport="clr-namespace:PCGamingWikiMetadata.BulkImport"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=pecm:SelectStringsViewModel}"
+             d:DataContext="{d:DesignInstance Type=bulkImport:SelectStringsViewModel}"
              d:DesignHeight="450" d:DesignWidth="400">
     <Grid>
         <Grid.Resources>
