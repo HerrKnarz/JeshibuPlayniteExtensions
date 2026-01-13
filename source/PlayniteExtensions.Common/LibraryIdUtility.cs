@@ -79,7 +79,7 @@ public abstract class SingleExternalDatabaseIdUtility : ISingleExternalDatabaseI
     public IEnumerable<DbId> GetIdsFromGame(Game game)
     {
         if (LibraryIds.Contains(game.PluginId))
-            yield return new DbId(Database, game.GameId);
+            yield return new(Database, game.GameId);
 
         var linkIds = game.Links?.Select(l => GetIdFromUrl(l?.Url)).Where(id => id.Database != ExternalDatabase.None);
         if (linkIds != null)
@@ -112,7 +112,7 @@ public class SteamIdUtility : SingleExternalDatabaseIdUtility
 
 public class GOGIdUtility : SingleExternalDatabaseIdUtility
 {
-    private readonly Regex GOGUrlRegex = new(@"^https://www\.gogdb\.org/product/(?<id>[0-9]+)");
+    private readonly Regex _gogUrlRegex = new(@"^https://www\.gogdb\.org/product/(?<id>[0-9]+)");
 
     public override ExternalDatabase Database => ExternalDatabase.GOG;
 
@@ -126,7 +126,7 @@ public class GOGIdUtility : SingleExternalDatabaseIdUtility
         if (string.IsNullOrWhiteSpace(url))
             return default;
 
-        var match = GOGUrlRegex.Match(url);
+        var match = _gogUrlRegex.Match(url);
         if (match.Success)
             return DbId.GOG(match.Groups["id"].Value);
 
@@ -136,7 +136,7 @@ public class GOGIdUtility : SingleExternalDatabaseIdUtility
 
 public class MobyGamesIdUtility : SingleExternalDatabaseIdUtility
 {
-    private readonly Regex UrlIdRegex = new(@"\bmobygames\.com/game/(?<id>[0-9]+)(/|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+    private readonly Regex _urlIdRegex = new(@"\bmobygames\.com/game/(?<id>[0-9]+)(/|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
 
     public override ExternalDatabase Database => ExternalDatabase.MobyGames;
 
@@ -146,7 +146,7 @@ public class MobyGamesIdUtility : SingleExternalDatabaseIdUtility
     {
         if (url == null) return default;
 
-        var match = UrlIdRegex.Match(url);
+        var match = _urlIdRegex.Match(url);
         if (!match.Success) return default;
         var idString = match.Groups["id"].Value;
         return DbId.Moby(idString);
@@ -155,7 +155,7 @@ public class MobyGamesIdUtility : SingleExternalDatabaseIdUtility
 
 public class WikipediaIdUtility : SingleExternalDatabaseIdUtility
 {
-    private readonly Regex idRegex = new(@"https?://(?<lang>[a-z]+)\.wikipedia\.org/wiki/(?<article>[^?]+)", RegexOptions.Compiled);
+    private readonly Regex _idRegex = new(@"https?://(?<lang>[a-z]+)\.wikipedia\.org/wiki/(?<article>[^?]+)", RegexOptions.Compiled);
 
     public override ExternalDatabase Database => ExternalDatabase.Wikipedia;
     public override IEnumerable<Guid> LibraryIds => [];
@@ -164,9 +164,9 @@ public class WikipediaIdUtility : SingleExternalDatabaseIdUtility
         if(string.IsNullOrWhiteSpace(url))
             return default;
 
-        var match = idRegex.Match(url);
-        if(!match.Success)
-            return new(ExternalDatabase.None, null);
+        var match = _idRegex.Match(url);
+        if (!match.Success)
+            return default;
 
         var article = WebUtility.UrlDecode(match.Groups["article"].Value);
         var lang = match.Groups["lang"].Value;
@@ -200,18 +200,18 @@ public class WikipediaIdUtility : SingleExternalDatabaseIdUtility
 
 public class AggregateExternalDatabaseUtility : IExternalDatabaseIdUtility
 {
-    private readonly List<ISingleExternalDatabaseIdUtility> databaseIdUtilities = [];
+    private readonly List<ISingleExternalDatabaseIdUtility> _databaseIdUtilities = [];
 
-    public IEnumerable<ExternalDatabase> Databases => databaseIdUtilities.SelectMany(x => x.Databases).Distinct();
+    public IEnumerable<ExternalDatabase> Databases => _databaseIdUtilities.SelectMany(x => x.Databases).Distinct();
 
     public AggregateExternalDatabaseUtility(params ISingleExternalDatabaseIdUtility[] dbIdUtilities)
     {
-        databaseIdUtilities.AddRange(dbIdUtilities);
+        _databaseIdUtilities.AddRange(dbIdUtilities);
     }
 
     public DbId GetIdFromUrl(string url)
     {
-        foreach (var dbIdUtil in databaseIdUtilities)
+        foreach (var dbIdUtil in _databaseIdUtilities)
         {
             var id = dbIdUtil.GetIdFromUrl(url);
             if (id.Database != ExternalDatabase.None)
@@ -222,7 +222,7 @@ public class AggregateExternalDatabaseUtility : IExternalDatabaseIdUtility
 
     public ExternalDatabase GetDatabaseFromPluginId(Guid libraryId)
     {
-        foreach (var dbIdUtil in databaseIdUtilities)
+        foreach (var dbIdUtil in _databaseIdUtilities)
             if (dbIdUtil.LibraryIds.Contains(libraryId))
                 return dbIdUtil.Database;
 
