@@ -1,4 +1,5 @@
 using Playnite.SDK;
+using Playnite.SDK.Models;
 using PlayniteExtensions.Common;
 using PlayniteExtensions.Metadata.Common;
 using System.Collections.Generic;
@@ -52,6 +53,7 @@ public class WikipediaCategoryBulkImport : BulkGamePropertyAssigner<WikipediaSea
 
                     category.Subcategories.Add(DownloadCategory(subcategoryName));
                 }
+
                 return category;
             }
         }, GetGameDownloadProgressOptions(searchResult));
@@ -103,6 +105,21 @@ public class WikipediaCategoryBulkImport : BulkGamePropertyAssigner<WikipediaSea
 
             return articles;
         }
+    }
+
+    protected override IEnumerable<PotentialLink> GetPotentialLinks(WikipediaSearchResult searchItem) => [new(MetadataProviderName, g => g.Url, IsAlreadyLinked)];
+
+    private bool IsAlreadyLinked(IEnumerable<Link> links, string url)
+    {
+        var gameId = DatabaseIdUtility.GetIdFromUrl(url);
+        foreach (var link in links)
+        {
+            var linkId = DatabaseIdUtility.GetIdFromUrl(link?.Url);
+            if (linkId == gameId)
+                return true;
+        }
+
+        return false;
     }
 }
 

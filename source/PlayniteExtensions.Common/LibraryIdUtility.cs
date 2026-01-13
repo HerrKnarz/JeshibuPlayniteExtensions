@@ -193,7 +193,7 @@ public class WikipediaIdUtility : SingleExternalDatabaseIdUtility
 
     public static string ToWikipediaUrl(string lang, string name)
     {
-        var slug = WebUtility.UrlEncode(name?.Replace(' ', '_'));
+        var slug = name?.Replace(' ', '_').Replace("?", "%3F").Replace("%", "%25");
         return $"https://{lang}.wikipedia.org/wiki/{slug}";
     }
 }

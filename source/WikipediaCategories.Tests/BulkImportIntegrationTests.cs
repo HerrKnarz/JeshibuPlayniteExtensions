@@ -46,6 +46,7 @@ public class BulkImportIntegrationTests
         bi.ImportGameProperty();
 
         Assert.All(db.Games, g => g.TagIds.Single());
+        Assert.All(db.Games, g => g.Links.Single());
         Assert.Single(db.Tags, t => t.Name == "Video games set in the 16th century");
         downloader.AssertAllUrlsCalledOnce();
     }
