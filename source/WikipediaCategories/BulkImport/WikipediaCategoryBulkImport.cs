@@ -130,7 +130,7 @@ public static class WikipediaHelper
 
 public class WikipediaBulkImportUserInterface(IPlayniteAPI playniteApi) : BulkPropertyUserInterface(playniteApi)
 {
-    public SelectCategoriesViewModel SelectSubcategories(SelectCategoriesViewModel vm)
+    public virtual SelectCategoriesViewModel SelectSubcategories(SelectCategoriesViewModel vm)
     {
         var window = PlayniteApi.Dialogs.CreateWindow(new() { ShowCloseButton = true });
         var view = new SelectCategoriesView(window, vm);

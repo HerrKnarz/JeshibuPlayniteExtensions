@@ -3,16 +3,28 @@ using Playnite.SDK.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PlayniteExtensions.Tests.Common;
 
-class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject
+internal class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject, new()
 {
-    public T this[Guid id] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    private Dictionary<Guid, T> _items = [];
 
-    public GameDatabaseCollection CollectionType => throw new NotImplementedException();
+    public T this[Guid id]
+    {
+        get => _items[id];
+        set => _items[id] = value;
+    }
 
-    public int Count => throw new NotImplementedException();
+    public GameDatabaseCollection CollectionType => new T() switch
+    {
+        AgeRating _ => GameDatabaseCollection.AgeRatings,
+        //TODO: implement the rest if this matters at all
+        _ => GameDatabaseCollection.Uknown,
+    };
+
+    public int Count => _items.Count;
 
     public bool IsReadOnly => throw new NotImplementedException();
 
@@ -21,7 +33,9 @@ class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject
 
     public T Add(string itemName)
     {
-        throw new NotImplementedException();
+        var newItem = new T { Name = itemName };
+        _items[newItem.Id] = newItem;
+        return newItem;
     }
 
     public T Add(string itemName, Func<T, string, bool> existingComparer)
@@ -31,7 +45,7 @@ class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject
 
     public IEnumerable<T> Add(List<string> items)
     {
-        throw new NotImplementedException();
+        return items.Select(Add);
     }
 
     public T Add(MetadataProperty property)
@@ -51,17 +65,20 @@ class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject
 
     public void Add(IEnumerable<T> items)
     {
-        throw new NotImplementedException();
+        foreach (var item in items)
+            Add(item);
     }
 
     public void Add(T item)
     {
-        throw new NotImplementedException();
+        if (item == null)
+            return;
+
+        _items.Add(item.Id, item);
     }
 
     public void BeginBufferUpdate()
     {
-        throw new NotImplementedException();
     }
 
     public IDisposable BufferedUpdate()
@@ -69,20 +86,11 @@ class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject
         throw new NotImplementedException();
     }
 
-    public void Clear()
-    {
-        throw new NotImplementedException();
-    }
+    public void Clear() => _items.Clear();
 
-    public bool Contains(T item)
-    {
-        throw new NotImplementedException();
-    }
+    public bool Contains(T item) => _items.Values.Contains(item);
 
-    public bool ContainsItem(Guid id)
-    {
-        throw new NotImplementedException();
-    }
+    public bool ContainsItem(Guid id) => _items.ContainsKey(id);
 
     public void CopyTo(T[] array, int arrayIndex)
     {
@@ -91,17 +99,15 @@ class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject
 
     public void Dispose()
     {
-        throw new NotImplementedException();
     }
 
     public void EndBufferUpdate()
     {
-        throw new NotImplementedException();
     }
 
     public T Get(Guid id)
     {
-        throw new NotImplementedException();
+        return _items[id];
     }
 
     public List<T> Get(IList<Guid> ids)
@@ -114,38 +120,21 @@ class FakeItemCollection<T> : IItemCollection<T> where T : DatabaseObject
         throw new NotImplementedException();
     }
 
-    public IEnumerator<T> GetEnumerator()
-    {
-        return new List<T>().GetEnumerator();
-    }
+    public IEnumerator<T> GetEnumerator() => _items.Values.GetEnumerator();
 
-    public bool Remove(Guid id)
-    {
-        throw new NotImplementedException();
-    }
+    public bool Remove(Guid id) => _items.Remove(id);
 
-    public bool Remove(IEnumerable<T> items)
-    {
-        throw new NotImplementedException();
-    }
+    public bool Remove(IEnumerable<T> items) => items.All(Remove);
 
-    public bool Remove(T item)
-    {
-        throw new NotImplementedException();
-    }
+    public bool Remove(T item) => item != null && _items.Remove(item.Id);
 
     public void Update(T item)
     {
-        throw new NotImplementedException();
     }
 
     public void Update(IEnumerable<T> items)
     {
-        throw new NotImplementedException();
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => _items.Values.GetEnumerator();
 }

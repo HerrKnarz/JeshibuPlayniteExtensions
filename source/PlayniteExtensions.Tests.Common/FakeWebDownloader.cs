@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace PlayniteExtensions.Tests.Common;
 
@@ -70,5 +71,11 @@ public class FakeWebDownloader : IWebDownloader
             return Task.FromResult(new DownloadStringResponse(url, File.ReadAllText(filePath), HttpStatusCode.OK));
 
         throw new($"Url not accounted for: {url}");
+    }
+
+    public void AssertAllUrlsCalledOnce()
+    {
+        Assert.Equal(FilesByUrl.Count, CalledUrls.Count);
+        Assert.All(FilesByUrl.Keys, url => Assert.Contains(url, CalledUrls));
     }
 }
