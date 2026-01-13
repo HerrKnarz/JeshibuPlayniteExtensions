@@ -67,7 +67,7 @@ public abstract class BulkGamePropertyAssigner<TSearchItem, TApprovalPromptViewM
 
     protected virtual IEnumerable<GameDetails> GetGames(TSearchItem selectedItem)
     {
-        List<GameDetails> associatedGames = [];
+        List<GameDetails> associatedGames = null;
         Ui.ShowProgress(a => associatedGames = DataSource.GetDetails(selectedItem, a).ToList(), GetGameDownloadProgressOptions(selectedItem));
         return associatedGames;
     }

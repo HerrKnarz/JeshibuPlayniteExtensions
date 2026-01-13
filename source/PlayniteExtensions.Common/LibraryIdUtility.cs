@@ -41,7 +41,7 @@ public readonly struct DbId(ExternalDatabase database, string id) : IEquatable<D
     public static DbId TvTropes(string id) => new(ExternalDatabase.TvTropes, id);
     public static DbId RAWG(string id) => new(ExternalDatabase.RAWG, id);
     public static DbId Wikipedia(string id) => new(ExternalDatabase.Wikipedia, id);
-    public static DbId Wikipedia(string lang, string article) => new(ExternalDatabase.Wikipedia, $"{lang}/{article}");
+    public static DbId Wikipedia(string lang, string article) => new(ExternalDatabase.Wikipedia, $"{lang}/{WebUtility.UrlDecode(article?.Replace(' ', '_'))}");
 }
 
 public interface IExternalDatabaseIdUtility

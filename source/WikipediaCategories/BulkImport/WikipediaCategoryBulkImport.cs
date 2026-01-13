@@ -44,8 +44,11 @@ public class WikipediaCategoryBulkImport : BulkGamePropertyAssigner<WikipediaSea
                 var category = new SelectableCategoryViewModel(categoryName, _wikipediaDataSource.GetCategoryContents(categoryName, progressArgs.CancelToken));
                 foreach (string subcategoryName in category.Contents.SubcategoryNames)
                 {
-                    if (progressArgs.CancelToken.IsCancellationRequested || !downloadedCategories.Add(subcategoryName))
+                    if (progressArgs.CancelToken.IsCancellationRequested)
                         break;
+
+                    if (!downloadedCategories.Add(subcategoryName))
+                        continue;
 
                     category.Subcategories.Add(DownloadCategory(subcategoryName));
                 }
