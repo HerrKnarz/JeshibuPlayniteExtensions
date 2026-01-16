@@ -101,6 +101,8 @@ public class SortableNameConverter
             return match.Value;
         });
 
+        output = output.Replace("Æ", "Ae"); //probably only doing this for Æon Flux, but oh well
+
         return removeEditions ? output : output + edition;
     }
 
