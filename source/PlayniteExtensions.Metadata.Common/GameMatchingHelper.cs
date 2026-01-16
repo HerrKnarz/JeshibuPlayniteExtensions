@@ -18,7 +18,7 @@ public class GameMatchingHelper(IExternalDatabaseIdUtility externalDatabaseIdUti
     public IExternalDatabaseIdUtility ExternalDatabaseIdUtility { get; } = externalDatabaseIdUtility;
     public int MaxDegreeOfParallelism { get; } = maxDegreeOfParallelism;
 
-    private readonly SortableNameConverter sortableNameConverter = new(numberLength: 1, removeEditions: true);
+    private readonly SortableNameConverter sortableNameConverter = new(numberLength: 1);
 
     public HashSet<string> GetDeflatedNames(IEnumerable<string> names)
     {
@@ -33,7 +33,7 @@ public class GameMatchingHelper(IExternalDatabaseIdUtility externalDatabaseIdUti
     private string GenerateDeflatedName(string name)
     {
         return sortableNameConverter
-            .Convert(name)
+            .Convert(name, removeEditions: true)
             .Deflate()
             .Normalize(NormalizationForm.FormKD);
     }

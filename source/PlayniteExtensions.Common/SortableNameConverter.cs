@@ -10,7 +10,6 @@ public class SortableNameConverter
     private readonly string[] removeFromStart;
     private readonly string[] removeFromEnd;
     private readonly int numberLength;
-    private readonly bool removeEditions;
 
     /// <summary>
     /// These are valid roman numerals that are regularly used in game titles as not-numerals.
@@ -50,18 +49,18 @@ public class SortableNameConverter
     /// </summary>
     /// <param name="articles">Words to remove from the start of the title. Default: "The", "A", "An".</param>
     /// <param name="numberLength">The minimum string length of numbers. If 4, XXIII or 23 will turn into 0023, but 1999 will stay the same.</param>
-    /// <param name="removeEditions">If true, remove editions from the end of titles</param>
-    public SortableNameConverter(string[] articles = null, int numberLength = 2, bool removeEditions = false)
+    public SortableNameConverter(string[] articles = null, int numberLength = 2)
     {
         articles ??= ["the", "a", "an"];
 
         removeFromStart = articles.Select(a => a + " ").ToArray();
         removeFromEnd = articles.Select(a => ", " + a).ToArray();
         this.numberLength = numberLength;
-        this.removeEditions = removeEditions;
     }
 
-    public string Convert(string input)
+    /// <param name="input">The game name</param>
+    /// <param name="removeEditions">If true, remove editions from the end of titles</param>
+    public string Convert(string input, bool removeEditions)
     {
         if (string.IsNullOrWhiteSpace(input))
         {

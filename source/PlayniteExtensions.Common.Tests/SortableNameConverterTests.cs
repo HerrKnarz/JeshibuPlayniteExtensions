@@ -51,7 +51,7 @@ public class SortableNameConverterTests
     public void ConvertToSortableNameTest(string input, string expected)
     {
         var c = new SortableNameConverter();
-        var output = c.Convert(input);
+        var output = c.Convert(input, removeEditions: false);
         Assert.Equal(expected, output);
     }
 
@@ -89,8 +89,8 @@ public class SortableNameConverterTests
     [InlineData("Paranautical Activity: Deluxe Atonement Edition", "Paranautical Activity")]
     public void RemoveEditionsTest(string input, string expected)
     {
-        var c = new SortableNameConverter(removeEditions: true);
-        var output = c.Convert(input);
+        var c = new SortableNameConverter();
+        var output = c.Convert(input, removeEditions: true);
         Assert.Equal(expected, output);
     }
 
@@ -99,8 +99,8 @@ public class SortableNameConverterTests
     [InlineData("Coma: Recut")]
     public void RemoveEditionsIsUnchanged(string input)
     {
-        var c = new SortableNameConverter(removeEditions: true);
-        var output = c.Convert(input);
+        var c = new SortableNameConverter();
+        var output = c.Convert(input, removeEditions: true);
         Assert.Equal(input, output);
     }
 
@@ -139,7 +139,7 @@ public class SortableNameConverterTests
     public void SortableNameIsUnchanged(string input)
     {
         var c = new SortableNameConverter();
-        var output = c.Convert(input);
+        var output = c.Convert(input, removeEditions: false);
         Assert.Equal(input, output);
     }
 
@@ -149,7 +149,7 @@ public class SortableNameConverterTests
     public void SortableNameNoArticlesRemovedTest(string input, string expected)
     {
         var c = new SortableNameConverter([]);
-        var output = c.Convert(input);
+        var output = c.Convert(input, removeEditions: false);
         Assert.Equal(expected, output);
     }
 

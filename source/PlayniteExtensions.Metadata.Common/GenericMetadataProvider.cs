@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PlayniteExtensions.Common;
+using System.Threading;
 
 namespace PlayniteExtensions.Metadata.Common;
 
@@ -24,15 +25,13 @@ public abstract class GenericMetadataProvider<TSearchResult>(IGameSearchProvider
         if (foundGame != null)
             return foundGame;
 
-        if (foundGame == null)
-        {
-            if (options.IsBackgroundDownload && dataSource.TryGetDetails(options.GameData, out var details, args.CancelToken))
-                return foundGame = details;
+        if (options.IsBackgroundDownload && dataSource.TryGetDetails(options.GameData, out var details, args.CancelToken))
+            return foundGame = details;
 
-            var searchResult = GetSearchResultGame(args);
-            if (searchResult != null)
-                return foundGame = dataSource.GetDetails(searchResult, searchGame: options.GameData);
-        }
+        var searchResult = GetSearchResultGame(args);
+        if (searchResult != null)
+            return foundGame = dataSource.GetDetails(searchResult, searchGame: options.GameData);
+
         return foundGame = new GameDetails();
     }
 
@@ -48,9 +47,9 @@ public abstract class GenericMetadataProvider<TSearchResult>(IGameSearchProvider
             if (searchResult == null)
                 return default;
 
-            var snc = new SortableNameConverter([], numberLength: 1, removeEditions: true);
+            var snc = new SortableNameConverter([], numberLength: 1);
 
-            var nameToMatch = snc.Convert(options.GameData.Name).Deflate();
+            var nameToMatch = snc.Convert(options.GameData.Name, removeEditions: true).Deflate();
 
             var matchedGames = searchResult.Where(g => HasMatchingName(g, nameToMatch, snc) && platformUtility.PlatformsOverlap(requestPlatforms, g.Platforms)).ToList();
 
@@ -77,7 +76,7 @@ public abstract class GenericMetadataProvider<TSearchResult>(IGameSearchProvider
 
                 try
                 {
-                    var searchResult = dataSource.Search(a, new System.Threading.CancellationToken());
+                    var searchResult = dataSource.Search(a, CancellationToken.None);
                     if (searchResult != null)
                         searchOutput.AddRange(searchResult.Select(dataSource.ToGenericItemOption));
                 }
@@ -94,7 +93,7 @@ public abstract class GenericMetadataProvider<TSearchResult>(IGameSearchProvider
         }
     }
 
-    private int GetDaysApart(ReleaseDate? searchDate, ReleaseDate? resultDate)
+    private static int GetDaysApart(ReleaseDate? searchDate, ReleaseDate? resultDate)
     {
         if (searchDate == null)
             return 0;
@@ -115,11 +114,9 @@ public abstract class GenericMetadataProvider<TSearchResult>(IGameSearchProvider
 
         foreach (var gameName in gameNames)
         {
-            var deflatedGameName = snc.Convert(gameName).Deflate();
+            var deflatedGameName = snc.Convert(gameName, removeEditions: true).Deflate();
             if (deflatedSearchName.Equals(deflatedGameName, StringComparison.InvariantCultureIgnoreCase))
-            {
                 return true;
-            }
         }
         return false;
     }

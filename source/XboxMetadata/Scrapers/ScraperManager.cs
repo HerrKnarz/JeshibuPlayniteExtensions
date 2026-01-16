@@ -26,7 +26,7 @@ public class ScraperManager
     {
         var tasks = Scrapers.Values.OrderBy(s => s.ExecutionOrder).Select(s => s.SearchAsync(settings, searchString)).ToArray();
         var snc = new SortableNameConverter();
-        var searchNameNormalized = snc.Convert(searchString).Deflate();
+        var searchNameNormalized = snc.Convert(searchString, removeEditions: true).Deflate();
         Task.WaitAll(tasks, 30000);
         var perfectMatches = new List<XboxGameSearchResultItem>();
         var titleMatches = new List<XboxGameSearchResultItem>();
@@ -36,7 +36,7 @@ public class ScraperManager
         {
             foreach (var searchResultItem in t.Result)
             {
-                var searchResultNameNormalized = snc.Convert(searchResultItem.Title).Deflate();
+                var searchResultNameNormalized = snc.Convert(searchResultItem.Title, removeEditions: true).Deflate();
                 bool nameMatched = searchNameNormalized.Equals(searchResultNameNormalized, StringComparison.InvariantCultureIgnoreCase);
 
                 if (nameMatched && HasPlatformOverlap(game, searchResultItem))
