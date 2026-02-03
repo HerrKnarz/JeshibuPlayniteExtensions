@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,20 +10,19 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_REG_BBALL : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
-
 
     public PCGWGame_Test_REG_BBALL()
     {
-        this.options = TestMetadataRequestOptions.Epic();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Regular Human Basketball", -1);
-        this.client.GetSettings().ImportMultiplayerTypes = true;
-        this.client.GetSettings().ImportFeatureFramerate60 = true;
-        this.client.GetSettings().ImportFeatureFramerate120 = true;
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Regular Human Basketball";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportMultiplayerTypes = true,
+            ImportFeatureFramerate60 = true,
+            ImportFeatureFramerate120 = true,
+            ImportFeatureVR = true,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/regular-human-basketball.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.Epic, settings, downloader);
     }
 
     [Fact]
@@ -107,6 +107,5 @@ public class PCGWGame_Test_REG_BBALL : IDisposable
 
     public void Dispose()
     {
-
     }
 }

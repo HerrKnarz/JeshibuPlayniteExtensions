@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,16 +10,13 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_CITIES : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_CITIES()
     {
-        this.options = TestMetadataRequestOptions.Steam();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Cities: Skylines", -1);
-        this.client.GetSettings().ImportLinkOfficialSite = false;
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Cities: Skylines";
+        var settings = new PCGamingWikiMetadataSettings { ImportLinkOfficialSite = false, };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/cities-skylines.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.Steam, settings, downloader);
     }
 
     [Fact]

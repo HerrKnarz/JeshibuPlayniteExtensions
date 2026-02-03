@@ -222,9 +222,9 @@ public class PcGamingWikiHtmlParser(string html, PCGWGameController gameControll
                         {
                             "Full controller support" => gameController.Game.AddFullControllerSupport,
                             "Controller support" => gameController.Game.AddControllerSupport,
-                            "Touchscreen optimised" => gameController.Game.AddTouchscreenSupport,
+                            "Touchscreen support" => gameController.Game.AddTouchscreenSupport,
                             "PlayStation controllers" => gameController.Game.AddPlayStationControllerSupport,
-                            "PlayStation button prompts" => gameController.Game.AddPlayStationButtonPrompts,
+                            "PlayStation button prompts" => gameController.Game.AddPlayStationButtonPrompts, //TODO: this is done differently now, see https://www.pcgamingwiki.com/wiki/God_of_War
                             "Light bar support" => gameController.Game.AddLightBarSupport,
                             "Adaptive trigger support" => gameController.Game.AddAdaptiveTriggerSupport,
                             "DualSense haptic feedback support" => gameController.Game.AddHapticFeedbackSupport,

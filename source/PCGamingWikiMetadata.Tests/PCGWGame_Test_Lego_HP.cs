@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,21 +10,21 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_Lego_HP : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
 
     public PCGWGame_Test_Lego_HP()
     {
-        this.options = TestMetadataRequestOptions.Steam();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Lego Harry Potter: Years 1-4", -1);
-        this.client.GetSettings().ImportTagNoCloudSaves = true;
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.GetSettings().ImportFeatureFramerate60 = true;
-        this.client.GetSettings().ImportFeatureFramerate120 = true;
-        this.client.GetSettings().ImportMultiplayerTypes = true;
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Lego Harry Potter: Years 1-4";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportTagNoCloudSaves = true,
+            ImportFeatureVR = true,
+            ImportFeatureFramerate60 = true,
+            ImportFeatureFramerate120 = true,
+            ImportMultiplayerTypes = true,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/lego-harry-potter.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.Steam, settings, downloader);
     }
 
     [Fact]
@@ -95,6 +96,7 @@ public class PCGWGame_Test_Lego_HP : IDisposable
         var arr = this.testGame.Tags.Select(i => i.ToString()).ToArray();
         arr.Should().Contain("Contemporary", "Fantasy");
     }
+
     [Fact]
     public void TestParseEngine()
     {
@@ -160,8 +162,8 @@ public class PCGWGame_Test_Lego_HP : IDisposable
         var features = this.testGame.Features.Select(i => i.ToString()).ToArray();
         features.Should().NotContain("VR");
     }
+
     public void Dispose()
     {
-
     }
 }

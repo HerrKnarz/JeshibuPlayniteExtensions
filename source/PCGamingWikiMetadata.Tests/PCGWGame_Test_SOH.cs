@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,13 +10,12 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_SOH : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
 
     public PCGWGame_Test_SOH()
     {
-        this.client = new LocalPCGWClient();
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Song of Horror", -1);
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Song of Horror";
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/song-of-horror.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.BattleNet, new(), downloader);
     }
 
     [Fact]

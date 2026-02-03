@@ -5,7 +5,7 @@ namespace PCGamingWikiMetadata.Tests;
 
 public class TestMetadataRequestOptions : MetadataRequestOptions
 {
-    public TestMetadataRequestOptions(BuiltinExtension library) : base(null, false)
+    private TestMetadataRequestOptions(BuiltinExtension library) : base(null, false)
     {
         this.GameData = new()
         {
@@ -13,9 +13,9 @@ public class TestMetadataRequestOptions : MetadataRequestOptions
         };
     }
 
-    public static TestMetadataRequestOptions Steam() => new(BuiltinExtension.SteamLibrary);
-    public static TestMetadataRequestOptions Origin() => new(BuiltinExtension.OriginLibrary);
-    public static TestMetadataRequestOptions Xbox() => new(BuiltinExtension.XboxLibrary);
-    public static TestMetadataRequestOptions Epic() => new(BuiltinExtension.EpicLibrary);
-    public static TestMetadataRequestOptions BattleNet() => new(BuiltinExtension.BattleNetLibrary);
+    public static TestMetadataRequestOptions Steam => new(BuiltinExtension.SteamLibrary);
+    public static TestMetadataRequestOptions Origin => new(BuiltinExtension.OriginLibrary);
+    public static TestMetadataRequestOptions Xbox => new(BuiltinExtension.XboxLibrary);
+    public static TestMetadataRequestOptions Epic => new(BuiltinExtension.EpicLibrary);
+    public static TestMetadataRequestOptions BattleNet => new(BuiltinExtension.BattleNetLibrary);
 }

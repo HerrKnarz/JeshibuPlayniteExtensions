@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,17 +10,17 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_OVERCOOKED : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_OVERCOOKED()
     {
-        this.options = TestMetadataRequestOptions.Origin();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Overcooked!", -1);
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.GetSettings().ImportMultiplayerTypes = true;
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Overcooked!";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportFeatureVR =  true,
+            ImportMultiplayerTypes = true,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/overcooked.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.Origin, settings, downloader);
     }
 
     [Fact]

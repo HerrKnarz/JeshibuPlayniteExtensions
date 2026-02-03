@@ -25,4 +25,5 @@
   <ItemGroup>
     <ProjectReference Include="..\PCGamingWikiMetadata\PCGamingWikiMetadata.csproj" />
   </ItemGroup>
+  <Import Project="..\PlayniteExtensions.Tests.Common\PlayniteExtensions.Tests.Common.projitems" Label="Shared" />
 </Project>

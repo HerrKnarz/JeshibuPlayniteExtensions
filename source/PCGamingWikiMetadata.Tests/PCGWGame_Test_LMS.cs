@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,13 +10,12 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_LMS : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
 
     public PCGWGame_Test_LMS()
     {
-        this.client = new LocalPCGWClient();
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Lawn Mowing Simulator", -1);
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Lawn Mowing Simulator";
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/lawn-mowing-sim.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.BattleNet, new(), downloader);
     }
 
     [Fact]

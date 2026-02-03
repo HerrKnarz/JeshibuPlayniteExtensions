@@ -1,41 +1,128 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PCGamingWikiBulkImport;
+using PCGamingWikiBulkImport.DataCollection;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
-using RestSharp;
+using PlayniteExtensions.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace PCGamingWikiMetadata;
 
-public class PCGWClient(MetadataRequestOptions options, PCGWGameController gameController)
+public class PCGWClient(MetadataRequestOptions options, PCGWGameController gameController, IWebDownloader downloader) : ICargoQuery
 {
-    private readonly ILogger logger = LogManager.GetLogger();
-    private readonly RestClient client = new RestClient("https://www.pcgamingwiki.com/w/api.php").AddDefaultQueryParameter("format", "json");
-    protected MetadataRequestOptions options = options;
-    protected PCGWGameController gameController = gameController;
+    private readonly ILogger _logger = LogManager.GetLogger();
+    private const string BaseUrl = "https://www.pcgamingwiki.com/w/api.php?format=json";
 
-    public JObject ExecuteRequest(RestRequest request)
+    public static string GetGameSearchUrl(string searchName) => GetUrl(new()
     {
-        var fullUrl = client.BuildUri(request);
-        logger.Info(fullUrl.ToString());
+        { "action", "query" },
+        { "list", "search" },
+        { "srlimit", "300" },
+        { "srwhat", "title" },
+        { "srsearch", $"\"{NormalizeSearchString(searchName)}\"" },
+    });
 
-        var response = client.Execute(request);
+    public static string GetGamePageUrl(string gameName) => GetUrl(new()
+    {
+        { "action", "parse" },
+        { "page", gameName.TitleToSlug(urlEncode: false) },
+    });
 
-        if (response.ErrorException != null)
+    public static string GetValueCountsUrl(string table, string field, string filter = null)
+    {
+        string having = "Value IS NOT NULL";
+
+        if (!string.IsNullOrWhiteSpace(filter))
+            having = $"Value LIKE '%{EscapeString(filter)}%'";
+
+        return GetUrl(new()
         {
-            const string message = "Error retrieving response.  Check inner details for more info.";
-            var e = new Exception(message, response.ErrorException);
-            throw e;
-        }
-
-        var content = response.Content;
-
-        return JObject.Parse(content);
+            { "action", "cargoquery" },
+            { "limit", "max" },
+            { "tables", table },
+            { "fields", $"{table}.{field}=Value,COUNT(*)=Count" },
+            { "group_by", $"{table}.{field}" },
+            { "having", having },
+        });
     }
 
-    private string NormalizeSearchString(string search)
+    public static string GetGamesByHoldsUrl(string table, string field, string holds, int offset)
+    {
+        var args = GetBaseGameRequestParameters(table, field);
+        args.Add("where", $"{table}.{field} HOLDS '{EscapeString(holds)}'");
+        args.Add("offset", $"{offset:0}");
+
+        return GetUrl(args);
+    }
+
+    public static string GetGamesByHoldsLikeUrl(string table, string field, string holds, int offset)
+    {
+        var args = GetBaseGameRequestParameters(table, field);
+        args.Add("where", $"{table}.{field} HOLDS LIKE '{EscapeString(holds)}'");
+        args.Add("offset", $"{offset:0}");
+
+        return GetUrl(args);
+    }
+
+    public static string GetGamesByExactValuesUrl(string table, string field, IEnumerable<string> values, int offset)
+    {
+        var args = GetBaseGameRequestParameters(table, field);
+
+        var valuesList = string.Join(", ", values.Select(v => $"'{EscapeString(v)}'"));
+
+        args.Add("where", $"{table}.{field} IN ({valuesList})");
+        args.Add("offset", $"{offset:0}");
+        return GetUrl(args);
+    }
+
+    private static string GetUrl(Dictionary<string, string> parameters, Dictionary<string, string> continueParams = null)
+    {
+        StringBuilder sb = new(BaseUrl);
+
+        AddParameters(parameters);
+        AddParameters(continueParams);
+
+        return sb.ToString();
+
+        void AddParameters(Dictionary<string, string> localParameters)
+        {
+            if (localParameters == null)
+                return;
+
+            foreach (var parameter in localParameters)
+            {
+                sb.Append('&').Append(parameter.Key);
+
+                if (!string.IsNullOrEmpty(parameter.Value))
+                    sb.Append('=').Append(Uri.EscapeDataString(parameter.Value));
+            }
+        }
+    }
+
+    private JObject ExecuteRequest(string url)
+    {
+        try
+        {
+            _logger.Info(url);
+
+            var response = downloader.DownloadString(url);
+
+            return JObject.Parse(response.ResponseContent);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, "Error performing API request");
+            const string message = "Error retrieving response. Check inner details for more info.";
+            var e = new Exception(message, ex);
+            throw e;
+        }
+    }
+
+    private static string NormalizeSearchString(string search)
     {
         // Replace ' with " as a workaround for search API returning no results
         return search.Replace('-', ' ').Replace('\'', '"');
@@ -44,26 +131,19 @@ public class PCGWClient(MetadataRequestOptions options, PCGWGameController gameC
     public List<GenericItemOption> SearchGames(string searchName)
     {
         List<GenericItemOption> gameResults = [];
-        logger.Info(searchName);
-
-        var request = new RestRequest();
-        request.AddQueryParameter("action", "query");
-        request.AddQueryParameter("list", "search");
-        request.AddQueryParameter("srlimit", 300);
-        request.AddQueryParameter("srwhat", "title");
-        request.AddQueryParameter("srsearch", $"\"{NormalizeSearchString(searchName)}\"");
+        _logger.Info(searchName);
 
         try
         {
-            JObject searchResults = ExecuteRequest(request);
+            JObject searchResults = ExecuteRequest(GetGameSearchUrl(searchName));
 
             if (searchResults.TryGetValue("error", out JToken error))
             {
-                logger.Error($"Encountered API error: {error}");
+                _logger.Error($"Encountered API error: {error}");
                 return gameResults;
             }
 
-            logger.Debug($"SearchGames {searchResults["query"]["searchinfo"]["totalhits"]} results for {searchName}");
+            _logger.Debug($"SearchGames {searchResults["query"]["searchinfo"]["totalhits"]} results for {searchName}");
 
             foreach (dynamic game in searchResults["query"]["search"])
             {
@@ -73,27 +153,23 @@ public class PCGWClient(MetadataRequestOptions options, PCGWGameController gameC
         }
         catch (Exception e)
         {
-            logger.Error(e, "Error performing search");
+            _logger.Error(e, "Error performing search");
         }
 
         return gameResults.OrderBy(game => NameStringCompare(searchName, game.Name)).ToList();
     }
 
-    public virtual void FetchGamePageContent(PcgwGame game)
+    public void FetchGamePageContent(PcgwGame game)
     {
-        var request = new RestRequest()
-                      .AddQueryParameter("action", "parse")
-                      .AddQueryParameter("page", game.Name.TitleToSlug(urlEncode: false));
-
         game.LibraryGame = options.GameData;
 
         try
         {
-            JObject content = ExecuteRequest(request);
+            JObject content = ExecuteRequest(GetGamePageUrl(game.Name));
 
             if (content.TryGetValue("error", out JToken error))
             {
-                logger.Error($"Encountered API error: {error}");
+                _logger.Error($"Encountered API error: {error}");
             }
 
             PCGamingWikiJSONParser jsonParser = new(content, gameController);
@@ -102,7 +178,7 @@ public class PCGWClient(MetadataRequestOptions options, PCGWGameController gameC
 
             if (parser.CheckPageRedirect(out string redirectPage))
             {
-                logger.Debug($"redirect link: {redirectPage}");
+                _logger.Debug($"redirect link: {redirectPage}");
                 game.Name = redirectPage;
                 FetchGamePageContent(game);
             }
@@ -114,9 +190,71 @@ public class PCGWClient(MetadataRequestOptions options, PCGWGameController gameC
         }
         catch (Exception e)
         {
-            logger.Error($"Error performing FetchGamePageContent for {game.Name}: {e}");
+            _logger.Error($"Error performing FetchGamePageContent for {game.Name}: {e}");
         }
     }
+
+    public IEnumerable<ItemCount> GetValueCounts(string table, string field, string filter = null)
+    {
+        var result = Execute<CargoResultRoot<ItemCount>>(GetValueCountsUrl(table, field, filter));
+        return result?.CargoQuery.Select(t => t.Title) ?? [];
+    }
+
+    public CargoResultRoot<CargoResultGame> GetGamesByHolds(string table, string field, string holds, int offset)
+    {
+        return Execute<CargoResultRoot<CargoResultGame>>(GetGamesByHoldsUrl(table, field, holds, offset));
+    }
+
+    public CargoResultRoot<CargoResultGame> GetGamesByHoldsLike(string table, string field, string holds, int offset)
+    {
+        return Execute<CargoResultRoot<CargoResultGame>>(GetGamesByHoldsLikeUrl(table, field, holds, offset));
+    }
+
+    public CargoResultRoot<CargoResultGame> GetGamesByExactValues(string table, string field, IEnumerable<string> values, int offset)
+    {
+        return Execute<CargoResultRoot<CargoResultGame>>(GetGamesByExactValuesUrl(table, field, values, offset));
+    }
+
+    private static Dictionary<string, string> GetBaseGameRequestParameters(string table, string field)
+    {
+        const string baseTable = CargoTables.Names.GameInfoBox;
+
+        var output = new Dictionary<string, string>
+        {
+            { "action", "cargoquery" },
+            { "limit", "max" },
+            { "fields", $"{baseTable}._pageName=Name,{baseTable}.Released,{baseTable}.Available_on=OS,{baseTable}.Steam_AppID=SteamID,{baseTable}.GOGcom_ID=GOGID,{table}.{field}=Value" }
+        };
+
+        if (table == baseTable)
+        {
+            output.Add("tables", baseTable);
+        }
+        else
+        {
+            output.Add("tables", $"{baseTable},{table}");
+            output.Add("join_on", $"{baseTable}._pageID={table}._pageID");
+        }
+
+        return output;
+    }
+
+    private T Execute<T>(string url) where T : class
+    {
+        try
+        {
+            var response = downloader.DownloadString(url);
+            var data = JsonConvert.DeserializeObject<T>(response.ResponseContent);
+            return data;
+        }
+        catch (Exception ex)
+        {
+            _logger.Warn(ex, "Error executing request");
+            return null;
+        }
+    }
+
+    private static string EscapeString(string str) => str?.Replace(@"\", @"\\").Replace("'", @"\'");
 
     // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.23
     private static int NameStringCompare(string a, string b)

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -8,17 +9,17 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_AC_INDIA : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_AC_INDIA()
     {
-        options = TestMetadataRequestOptions.BattleNet();
-        client = new LocalPCGWClient(options);
-        client.GetSettings().ImportTagMiddleware = true;
-        client.GetSettings().TagPrefixMiddleware = "[Middleware]";
-        testGame = new PcgwGame(client.GetSettings(), "Assassin's Creed Chronicles: India", -1);
-        client.FetchGamePageContent(testGame);
+        const string title = "Assassin's Creed Chronicles: India";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportTagMiddleware =  true,
+            TagPrefixMiddleware = "[Middleware]",
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/ac-india.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.BattleNet, settings, downloader);
     }
 
     [Fact]

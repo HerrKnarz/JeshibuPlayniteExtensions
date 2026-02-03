@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,22 +10,22 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_CODMW_nomulti : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_CODMW_nomulti()
     {
-        this.options = TestMetadataRequestOptions.BattleNet();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Call of Duty: Modern Warfare", -1);
-        this.client.GetSettings().ImportMultiplayerTypes = false;
-        this.client.GetSettings().ImportFeatureHDR = false;
-        this.client.GetSettings().ImportFeatureRayTracing = false;
-        this.client.GetSettings().ImportFeatureFramerate60 = false;
-        this.client.GetSettings().ImportFeatureFramerate120 = true;
-        this.client.GetSettings().ImportFeatureUltrawide = false;
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Call of Duty: Modern Warfare";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportMultiplayerTypes = false,
+            ImportFeatureHDR = false,
+            ImportFeatureRayTracing = false,
+            ImportFeatureFramerate60 = false,
+            ImportFeatureFramerate120 = true,
+            ImportFeatureUltrawide = false,
+            ImportFeatureVR = true,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/cod-mw.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.BattleNet, settings, downloader);
     }
 
     [Fact]

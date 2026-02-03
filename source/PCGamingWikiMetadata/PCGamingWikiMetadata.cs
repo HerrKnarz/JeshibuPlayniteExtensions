@@ -16,6 +16,7 @@ namespace PCGamingWikiMetadata;
 public class PCGamingWikiMetadata : MetadataPlugin
 {
     private static readonly ILogger logger = LogManager.GetLogger();
+    internal static IWebDownloader Downloader => field ??= new WebDownloader();
 
     private PCGamingWikiMetadataSettingsViewModel settings { get; set; }
 
@@ -83,7 +84,7 @@ public class PCGamingWikiMetadata : MetadataPlugin
     {
         var platformUtility = new PlatformUtility(PlayniteApi);
         var idUtility = new AggregateExternalDatabaseUtility(new PCGamingWikiIdUtility(), new SteamIdUtility(), new GOGIdUtility());
-        var searchProvider = new PCGamingWikiPropertySearchProvider(new CargoQuery(), platformUtility);
+        var searchProvider = new PCGamingWikiPropertySearchProvider(new PCGWClient(new(null, true), new(new()), Downloader), platformUtility);
         var bulk = new PCGamingWikiBulkGamePropertyAssigner(PlayniteApi, settings.Settings, idUtility, searchProvider, platformUtility, settings.Settings.MaxDegreeOfParallelism);
         bulk.ImportGameProperty();
     }

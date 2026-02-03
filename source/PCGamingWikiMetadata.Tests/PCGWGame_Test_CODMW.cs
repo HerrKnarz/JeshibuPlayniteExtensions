@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,24 +10,24 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_CODMW : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_CODMW()
     {
-        this.options = TestMetadataRequestOptions.BattleNet();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Call of Duty: Modern Warfare", -1);
-        this.client.GetSettings().ImportMultiplayerTypes = true;
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.GetSettings().ImportFeatureHDR = true;
-        this.client.GetSettings().ImportFeatureRayTracing = true;
-        this.client.GetSettings().ImportFeatureFramerate60 = true;
-        this.client.GetSettings().ImportFeatureFramerate120 = true;
-        this.client.GetSettings().ImportFeatureUltrawide = true;
-        this.client.GetSettings().ImportTagMonetization = true;
-        this.client.GetSettings().ImportTagMicrotransactions = true;
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Call of Duty: Modern Warfare";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportMultiplayerTypes = true,
+            ImportFeatureVR = true,
+            ImportFeatureHDR = true,
+            ImportFeatureRayTracing = true,
+            ImportFeatureFramerate60 = true,
+            ImportFeatureFramerate120 = true,
+            ImportFeatureUltrawide = true,
+            ImportTagMonetization = true,
+            ImportTagMicrotransactions = true,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/cod-mw.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.BattleNet, settings, downloader);
     }
 
     [Fact]
@@ -166,6 +167,5 @@ public class PCGWGame_Test_CODMW : IDisposable
 
     public void Dispose()
     {
-
     }
 }

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,33 +10,30 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_DQ11 : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_DQ11()
     {
-        this.options = TestMetadataRequestOptions.Xbox();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Dragon Quest XI S - Definitive Edition", -1);
-
-        this.client.GetSettings().ImportTagEngine = false;
-        this.client.GetSettings().ImportTagArtStyle = false;
-        this.client.GetSettings().ImportTagMonetization = false;
-        this.client.GetSettings().ImportTagMicrotransactions = false;
-        this.client.GetSettings().ImportTagPacing = false;
-        this.client.GetSettings().ImportTagPerspectives = false;
-        this.client.GetSettings().ImportTagControls = false;
-        this.client.GetSettings().ImportTagVehicles = false;
-        this.client.GetSettings().ImportTagThemes = false;
-        this.client.GetSettings().ImportTagArtStyle = false;
-        this.client.GetSettings().ImportXboxPlayAnywhere = false;
-        this.client.GetSettings().ImportFeatureHDR = true;
-        this.client.GetSettings().ImportFeatureRayTracing = true;
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.GetSettings().ImportLinkProtonDB = true;
-        this.client.GetSettings().ImportLinkIGDB = false;
-
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Dragon Quest XI S - Definitive Edition";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportTagEngine = false,
+            ImportTagArtStyle = false,
+            ImportTagMonetization = false,
+            ImportTagMicrotransactions = false,
+            ImportTagPacing = false,
+            ImportTagPerspectives = false,
+            ImportTagControls = false,
+            ImportTagVehicles = false,
+            ImportTagThemes = false,
+            ImportXboxPlayAnywhere = false,
+            ImportFeatureHDR = true,
+            ImportFeatureRayTracing = true,
+            ImportFeatureVR = true,
+            ImportLinkProtonDB = true,
+            ImportLinkIGDB = false,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/dq11.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.Xbox, settings, downloader);
     }
 
     [Fact]
@@ -107,6 +105,7 @@ public class PCGWGame_Test_DQ11 : IDisposable
         var arr = this.testGame.Tags.Select(i => i.ToString()).ToArray();
         arr.Should().NotContain("Turn-based");
     }
+
     [Fact]
     public void TestParseEngine()
     {
@@ -167,6 +166,5 @@ public class PCGWGame_Test_DQ11 : IDisposable
 
     public void Dispose()
     {
-
     }
 }

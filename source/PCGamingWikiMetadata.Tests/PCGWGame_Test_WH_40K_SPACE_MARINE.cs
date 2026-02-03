@@ -1,4 +1,5 @@
 using FluentAssertions;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -8,15 +9,12 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_WH_40K_SPACE_MARINE : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_WH_40K_SPACE_MARINE()
     {
-        this.options = TestMetadataRequestOptions.BattleNet();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Warhammer 40,000: Space Marine", -1);
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Warhammer 40,000: Space Marine";
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/space-marine.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.BattleNet, new(), downloader);
     }
 
     [Fact]

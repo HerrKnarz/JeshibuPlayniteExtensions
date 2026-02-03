@@ -1,6 +1,7 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
+using PlayniteExtensions.Common;
 using System;
 using System.Collections.Generic;
 
@@ -16,8 +17,18 @@ public class PCGamingWikiMetadataProvider : OnDemandMetadataProvider
 
     private readonly PCGWGameController gameController;
     private static readonly ILogger logger = LogManager.GetLogger();
+    private static IWebDownloader Downloader => field ??= new WebDownloader();
 
     public override List<MetadataField> AvailableFields => field ??= GetAvailableFields();
+
+    public PCGamingWikiMetadataProvider(MetadataRequestOptions options, IPlayniteAPI playniteApi, PCGamingWikiMetadataSettings settings)
+    {
+        this.options = options;
+        this.playniteApi = playniteApi;
+        this.settings = settings;
+        gameController = new PCGWGameController(settings);
+        client = new PCGWClient(this.options, gameController, Downloader);
+    }
 
     private List<MetadataField> GetAvailableFields()
     {
@@ -94,15 +105,6 @@ public class PCGamingWikiMetadataProvider : OnDemandMetadataProvider
                 logger.Error(e, "Failed to get PCGW metadata.");
             }
         }
-    }
-
-    public PCGamingWikiMetadataProvider(MetadataRequestOptions options, IPlayniteAPI playniteApi, PCGamingWikiMetadataSettings settings)
-    {
-        this.options = options;
-        this.playniteApi = playniteApi;
-        this.settings = settings;
-        gameController = new PCGWGameController(settings);
-        client = new PCGWClient(this.options, gameController);
     }
 
     public override string GetName(GetMetadataFieldArgs args)

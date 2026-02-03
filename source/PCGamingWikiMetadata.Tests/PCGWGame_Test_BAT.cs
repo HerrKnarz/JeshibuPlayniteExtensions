@@ -3,29 +3,29 @@ using System;
 using System.Linq;
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 
 namespace PCGamingWikiMetadata.Tests;
 
 public class PCGWGame_Test_BAT : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
-
 
     public PCGWGame_Test_BAT()
     {
-        this.options = TestMetadataRequestOptions.Epic();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Batman: Arkham Knight", -1);
-        this.client.GetSettings().ImportTagNoCloudSaves = false;
-        this.client.GetSettings().ImportFeatureFramerate60 = true;
-        this.client.GetSettings().ImportFeatureFramerate120 = true;
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.GetSettings().ImportTagMonetization = true;
-        this.client.GetSettings().ImportTagMicrotransactions = true;
-        this.client.GetSettings().ImportLinkGOGDatabase = false;
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Batman: Arkham Knight";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            ImportTagNoCloudSaves = false,
+            ImportFeatureFramerate60 = true,
+            ImportFeatureFramerate120 = true,
+            ImportFeatureVR = true,
+            ImportTagMonetization = true,
+            ImportTagMicrotransactions = true,
+            ImportLinkGOGDatabase = false,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/batman.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.Epic, settings, downloader);
     }
 
     [Fact]

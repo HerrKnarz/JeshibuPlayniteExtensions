@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Tests.Common;
 using System;
 using System.Linq;
 using Xunit;
@@ -9,22 +10,20 @@ namespace PCGamingWikiMetadata.Tests;
 public class PCGWGame_Test_YAKUZA4 : IDisposable
 {
     private readonly PcgwGame testGame;
-    private readonly LocalPCGWClient client;
-    private readonly TestMetadataRequestOptions options;
 
     public PCGWGame_Test_YAKUZA4()
     {
-        this.options = TestMetadataRequestOptions.Xbox();
-        this.client = new LocalPCGWClient(this.options);
-        this.testGame = new PcgwGame(this.client.GetSettings(), "Yakuza 4 Remastered", -1);
-
-        this.client.GetSettings().AddTagPrefix = false;
-        this.client.GetSettings().ImportXboxPlayAnywhere = true;
-        this.client.GetSettings().ImportFeatureVR = true;
-        this.client.GetSettings().ImportFeatureHDR = true;
-        this.client.GetSettings().ImportFeatureRayTracing = true;
-
-        this.client.FetchGamePageContent(this.testGame);
+        const string title = "Yakuza 4 Remastered";
+        var settings = new PCGamingWikiMetadataSettings
+        {
+            AddTagPrefix = false,
+            ImportXboxPlayAnywhere = true,
+            ImportFeatureVR = true,
+            ImportFeatureHDR = true,
+            ImportFeatureRayTracing = true,
+        };
+        var downloader = new FakeWebDownloader(PCGWClient.GetGamePageUrl(title), "data/yakuza4.json");
+        testGame = TestSetupHelper.GetGame(title, TestMetadataRequestOptions.Xbox, settings, downloader);
     }
 
     [Fact]
@@ -131,8 +130,8 @@ public class PCGWGame_Test_YAKUZA4 : IDisposable
         var features = this.testGame.Features.Select(i => i.ToString()).ToArray();
         features.Should().NotContain("VR");
     }
+
     public void Dispose()
     {
-
     }
 }
