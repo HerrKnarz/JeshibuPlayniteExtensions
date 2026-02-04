@@ -343,7 +343,11 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
 
         public static LaunchBoxImageFileOption FromImageDetails(LaunchBoxImageDetails imageDetails)
         {
-            var o = new LaunchBoxImageFileOption(imageDetails.ThumbnailUrl) { Description = imageDetails.Type, ImageDetails = imageDetails };
+            var o = new LaunchBoxImageFileOption(imageDetails.ThumbnailUrl)
+            {
+                Description = $"{imageDetails.Width}x{imageDetails.Height} {imageDetails.Type}",
+                ImageDetails = imageDetails,
+            };
             return o;
         }
     }

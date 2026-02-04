@@ -120,7 +120,7 @@ public class RawgMetadataProvider(MetadataRequestOptions options, RawgMetadata p
                 imageOptions.Add(new ImageFileOption(data.BackgroundImageAdditional));
 
             var screenshots = client.GetScreenshots(data.Slug);
-            imageOptions.AddRange(screenshots.Select(s => new ImageFileOption(s.Image)));
+            imageOptions.AddRange(screenshots.Select(s => new ImageFileOption(s.Image) { Description = $"{s.Width}x{s.Height}" }));
 
             var chosen = plugin.PlayniteApi.Dialogs.ChooseImageFile(imageOptions, "Choose a background");
             if (chosen == null)

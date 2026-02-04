@@ -129,8 +129,9 @@ public class GogApiClient(IWebDownloader downloader, GOGMetadataSettings setting
 
             var bgUrl = storeGame.galaxyBackgroundImage ?? storeGame.backgroundImage;
             if (!string.IsNullOrEmpty(bgUrl))
-                output.BackgroundOptions.Add(new BasicImage(bgUrl.Replace(".jpg", "_bg_crop_1920x655.jpg")));
+                output.BackgroundOptions.Add(new BasicImage(bgUrl.Replace(".jpg", "_bg_crop_1920x655.jpg")) { Width = 1920, Height = 655 });
         }
+
         return output;
     }
 
@@ -201,7 +202,7 @@ public class GogApiClient(IWebDownloader downloader, GOGMetadataSettings setting
         var htmlElement = firstChild as IHtmlElement;
         var promoUrlsRegex = @"https:\/\/items.gog.com\/(promobanners|autumn|fall|summer|winter)\/";
         var containsPromoImage = htmlElement.QuerySelectorAll("img")
-                    .Any(img => img.HasAttribute("src") && Regex.IsMatch(img.GetAttribute("src"), promoUrlsRegex, RegexOptions.IgnoreCase));
+                                            .Any(img => img.HasAttribute("src") && Regex.IsMatch(img.GetAttribute("src"), promoUrlsRegex, RegexOptions.IgnoreCase));
         if (!containsPromoImage)
         {
             return originalDescription;

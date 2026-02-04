@@ -255,6 +255,8 @@ public abstract class GenericMetadataProvider<TSearchResult>(IGameSearchProvider
         {
             Image = image;
             Path = image.ThumbnailUrl ?? image.Url;
+            if (image.Width != 0 && image.Height != 0)
+                Description = $"{image.Width}x{image.Height} {image.Description}";
         }
 
         public IImageData Image { get; }

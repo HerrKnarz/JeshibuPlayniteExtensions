@@ -253,6 +253,9 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
         public static XboxImageFileOption FromImageData(ImageData imageData)
         {
             var o = new XboxImageFileOption(imageData.ThumbnailUrl ?? imageData.Url) { ImageData = imageData };
+            if (imageData.Width > 0 && imageData.Height > 0)
+                o.Description = $"{imageData.Width}x{imageData.Height}";
+
             return o;
         }
     }
