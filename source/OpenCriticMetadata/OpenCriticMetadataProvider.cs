@@ -18,7 +18,7 @@ public class OpenCriticMetadataProvider(MetadataRequestOptions options, OpenCrit
 {
     public override List<MetadataField> AvailableFields => plugin.SupportedFields;
 
-    protected override string ProviderName { get; } = "OpenCritic";
+    protected override string ProviderName => "OpenCritic";
 }
 
 public class OpenCriticSearchProvider(IPlatformUtility platformUtility, OpenCriticMetadataSettings settings) : IGameSearchProvider<OpenCriticSearchResultItem>

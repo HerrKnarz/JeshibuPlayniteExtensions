@@ -8,27 +8,24 @@ using System.Collections.Generic;
 
 namespace MobyGamesMetadata;
 
-public class MobyGamesMetadataProvider(MetadataRequestOptions options, MobyGamesMetadata plugin, IGameSearchProvider<GameSearchResult> dataSource, IPlatformUtility platformUtility, MobyGamesMetadataSettings settings) : GenericMetadataProvider<GameSearchResult>(dataSource, options, plugin.PlayniteApi, platformUtility)
+public class MobyGamesMetadataProvider(MetadataRequestOptions options, MobyGamesMetadata plugin, IGameSearchProvider<GameSearchResult> dataSource, IPlatformUtility platformUtility, MobyGamesMetadataSettings settings)
+    : GenericMetadataProvider<GameSearchResult>(dataSource, options, plugin.PlayniteApi, platformUtility)
 {
     public override List<MetadataField> AvailableFields => plugin.SupportedFields;
 
-    protected override string ProviderName { get; } = "MobyGames";
+    protected override string ProviderName => "MobyGames";
 
     protected override bool FilterImage(GameField field, IImageData imageData)
     {
-        MobyGamesImageSourceSettings imgSettings;
-
-        switch (field)
+        var imgSettings = field switch
         {
-            case GameField.CoverImage:
-                 imgSettings = settings.Cover;
-                break;
-            case GameField.BackgroundImage:
-                imgSettings = settings.Background;
-                break;
-            default:
-                return true;
-        }
+            GameField.CoverImage => settings.Cover,
+            GameField.BackgroundImage => settings.Background,
+            _ => null,
+        };
+
+        if (imgSettings == null)
+            return true;
 
         if (imageData.Width < imgSettings.MinWidth || imageData.Height < imgSettings.MinHeight)
             return false;
@@ -44,9 +41,9 @@ public class MobyGamesMetadataProvider(MetadataRequestOptions options, MobyGames
 
     public override void Dispose()
     {
-        if(dataSource is IDisposable disposableDataSource)
+        if (dataSource is IDisposable disposableDataSource)
             disposableDataSource.Dispose();
-        
+
         base.Dispose();
     }
 }

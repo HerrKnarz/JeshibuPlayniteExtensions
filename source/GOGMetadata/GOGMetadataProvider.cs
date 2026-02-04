@@ -11,7 +11,7 @@ public class GOGMetadataProvider(IGameSearchProvider<GogSearchResponse.Product> 
 {
     public override List<MetadataField> AvailableFields => Fields;
 
-    public static List<MetadataField> Fields = [
+    public static readonly List<MetadataField> Fields = [
         MetadataField.Name,
         MetadataField.Description,
         MetadataField.Features,
@@ -29,5 +29,5 @@ public class GOGMetadataProvider(IGameSearchProvider<GogSearchResponse.Product> 
         MetadataField.CommunityScore,
     ];
 
-    protected override string ProviderName { get; } = "GOG";
+    protected override string ProviderName => "GOG";
 }

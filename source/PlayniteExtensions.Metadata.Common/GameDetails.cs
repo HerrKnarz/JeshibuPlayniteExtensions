@@ -52,7 +52,7 @@ public class GameDetails
 
     public string Version { get; set; }
 
-    public GameMetadata ToMetadata(IPlayniteAPI playniteAPI = null)
+    public GameMetadata ToMetadata(IPlayniteAPI playniteApi = null)
     {
         var metadata = new GameMetadata
         {
@@ -62,9 +62,9 @@ public class GameDetails
             Links = Links.NullIfEmpty()?.ToList(),
             CriticScore = CriticScore,
             CommunityScore = CommunityScore,
-            Icon = SelectImage(IconOptions, playniteAPI, "LOCSelectIconTitle"),
-            CoverImage = SelectImage(CoverOptions, playniteAPI, "LOCSelectCoverTitle"),
-            BackgroundImage = SelectImage(BackgroundOptions, playniteAPI, "LOCSelectBackgroundTitle"),
+            Icon = SelectImage(IconOptions, playniteApi, "LOCSelectIconTitle"),
+            CoverImage = SelectImage(CoverOptions, playniteApi, "LOCSelectCoverTitle"),
+            BackgroundImage = SelectImage(BackgroundOptions, playniteApi, "LOCSelectBackgroundTitle"),
             Series = ToMetadataProperties(Series),
             AgeRatings = ToMetadataProperties(AgeRatings),
             Platforms = Platforms.NullIfEmpty()?.ToHashSet(),
@@ -79,21 +79,21 @@ public class GameDetails
         return metadata;
     }
 
-    private MetadataFile SelectImage(List<IImageData> images, IPlayniteAPI playniteAPI = null, string titleResourceKey = null)
+    private static MetadataFile SelectImage(List<IImageData> images, IPlayniteAPI playniteApi = null, string titleResourceKey = null)
     {
         if (images == null || images.Count == 0) return null;
 
-        if (playniteAPI == null)
+        if (playniteApi == null)
             return new MetadataFile(images.First().Url);
 
-        var chosen = playniteAPI.Dialogs.ChooseImageFile(
+        var chosen = playniteApi.Dialogs.ChooseImageFile(
             images.Select(i => new ImageFileOption(i.Url)).ToList(),
-            playniteAPI?.Resources.GetString(titleResourceKey));
+            playniteApi?.Resources.GetString(titleResourceKey));
 
         return chosen == null ? null : new MetadataFile(chosen.Path);
     }
 
-    private HashSet<MetadataProperty> ToMetadataProperties(List<string> names)
+    private static HashSet<MetadataProperty> ToMetadataProperties(List<string> names)
     {
         if (names == null || names.Count == 0) return null;
         return names.Select(n => new MetadataNameProperty(n)).ToHashSet<MetadataProperty>();

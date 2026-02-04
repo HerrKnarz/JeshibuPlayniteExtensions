@@ -20,7 +20,7 @@ public class TvTropesMetadata : MetadataPlugin
 
     public override List<MetadataField> SupportedFields => TvTropesMetadataProvider.Fields;
 
-    public override string Name { get; } = "TV Tropes";
+    public override string Name => "TV Tropes";
 
     public TvTropesMetadata(IPlayniteAPI api) : base(api)
     {
@@ -59,7 +59,7 @@ public class TvTropesMetadata : MetadataPlugin
             yield break;
 
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-        var iconPath = Path.Combine(Path.GetDirectoryName(assemblyLocation), "icon.png");
+        var iconPath = Path.Combine(Path.GetDirectoryName(assemblyLocation)!, "icon.png");
         yield return new()
         {
             Icon = iconPath,

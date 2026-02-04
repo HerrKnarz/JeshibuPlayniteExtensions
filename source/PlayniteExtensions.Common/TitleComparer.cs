@@ -7,15 +7,12 @@ public class TitleComparer : StringComparer
 {
     public override int Compare(string x, string y)
     {
-        if (x == null || y == null)
-        {
-            if (x == null && y != null)
-                return -1;
-            if (x == null && y == null)
-                return 0;
-            if (x != null && y == null)
-                return 1;
-        }
+        if (x == null && y == null)
+            return 0;
+        if (x == null)
+            return -1;
+        if (y == null)
+            return 1;
 
         x = x.Normalize(NormalizationForm.FormKD);
         y = y.Normalize(NormalizationForm.FormKD);
@@ -52,7 +49,7 @@ public class TitleComparer : StringComparer
         while (index < str.Length)
         {
             char c = str[index];
-            if (char.IsLetter(c) || char.IsDigit(c))
+            if (char.IsLetterOrDigit(c))
             {
                 endOfString = false;
                 return c;

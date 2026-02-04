@@ -12,6 +12,7 @@ namespace RawgMetadata;
 public class RawgMetadataProvider(MetadataRequestOptions options, RawgMetadata plugin, RawgApiClient client, string languageCode = "eng") : OnDemandMetadataProvider
 {
     private readonly ILogger logger = LogManager.GetLogger();
+
     private RawgGameDetails FoundGameData
     {
         get;
@@ -21,6 +22,7 @@ public class RawgMetadataProvider(MetadataRequestOptions options, RawgMetadata p
             FoundSearchResult = value;
         }
     }
+
     private RawgGameBase FoundSearchResult { get; set; }
 
     public override List<MetadataField> AvailableFields { get; } =

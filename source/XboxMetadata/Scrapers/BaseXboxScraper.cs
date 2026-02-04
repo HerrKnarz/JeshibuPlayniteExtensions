@@ -10,8 +10,8 @@ public abstract class BaseXboxScraper(IWebDownloader downloader, IPlatformUtilit
 {
     public abstract string Key { get; }
     public abstract int ExecutionOrder { get; }
-    protected IWebDownloader downloader = downloader;
-    protected IPlatformUtility platformUtility = platformUtility;
+    protected readonly IWebDownloader downloader = downloader;
+    protected readonly IPlatformUtility platformUtility = platformUtility;
 
     public abstract Task<List<XboxGameSearchResultItem>> SearchAsync(XboxMetadataSettings settings, string query);
     public abstract Task<XboxGameDetails> GetDetailsAsync(XboxMetadataSettings settings, string id, string url);

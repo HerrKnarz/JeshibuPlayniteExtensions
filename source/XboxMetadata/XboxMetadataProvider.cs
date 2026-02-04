@@ -51,7 +51,7 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
 
     public override IEnumerable<MetadataProperty> GetDevelopers(GetMetadataFieldArgs args)
     {
-        return FindGame().Developers.NullIfEmpty()?.Select(d=>new MetadataNameProperty(d));
+        return FindGame().Developers.NullIfEmpty()?.Select(d => new MetadataNameProperty(d));
     }
 
     public override IEnumerable<MetadataProperty> GetPublishers(GetMetadataFieldArgs args)
@@ -71,7 +71,7 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
 
     public override IEnumerable<MetadataProperty> GetGenres(GetMetadataFieldArgs args)
     {
-        return FindGame().Genres.NullIfEmpty()?.Select(g=>new MetadataNameProperty(g));
+        return FindGame().Genres.NullIfEmpty()?.Select(g => new MetadataNameProperty(g));
     }
 
     public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
@@ -146,7 +146,7 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
         if (images == null || images.Count == 0)
             return null;
 
-        Func<ImageData, bool> FilterImageBySize = i =>
+        bool FilterImageBySize(ImageData i)
         {
             bool biggerThanMinimum = i != null && i.Width >= imgSettings.MinWidth && i.Height >= imgSettings.MinHeight;
             if (!biggerThanMinimum)
@@ -159,7 +159,8 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
                 AspectRatio.Square => i.Width == i.Height,
                 _ => true,
             };
-        };
+        }
+
         var filteredImages = images
                              .Where(FilterImageBySize)
                              .ToDictionarySafe(i => i.Url).Values //deduplicate by Url - for old games BoxArt and Poster are the same
@@ -209,6 +210,7 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
                 if (selected != null)
                     foundSearchResult = ((XboxGameSearchItemOption)selected).Game;
             }
+
             if (foundSearchResult == null)
             {
                 return foundGame = new XboxGameDetails();
@@ -229,6 +231,7 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
     private class XboxGameSearchItemOption : GenericItemOption
     {
         public XboxGameSearchResultItem Game { get; set; }
+
         public static XboxGameSearchItemOption FromSearchResult(XboxGameSearchResultItem game)
         {
             var descriptionItems = new List<string>();
@@ -243,11 +246,8 @@ public class XboxMetadataProvider(MetadataRequestOptions options, XboxMetadataSe
         }
     }
 
-    private class XboxImageFileOption : ImageFileOption
+    private class XboxImageFileOption(string path) : ImageFileOption(path)
     {
-        public XboxImageFileOption() : base() { }
-        public XboxImageFileOption(string path) : base(path) { }
-
         public ImageData ImageData { get; set; }
 
         public static XboxImageFileOption FromImageData(ImageData imageData)

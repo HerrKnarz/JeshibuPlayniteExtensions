@@ -51,10 +51,6 @@ public class GogApiClient(IWebDownloader downloader, GOGMetadataSettings setting
             if (line.TrimStart().StartsWith("window.activeFeatures"))
             {
                 var desData = Serialization.FromJson<StorePageResult>(stringData.TrimEnd(';'));
-                if (desData.cardProduct == null)
-                {
-                    return null;
-                }
 
                 return desData.cardProduct;
             }
@@ -120,13 +116,13 @@ public class GogApiClient(IWebDownloader downloader, GOGMetadataSettings setting
             if (!string.IsNullOrEmpty(gogDetails.links.forum))
                 output.Links.Add(new Link("GOG Forum", gogDetails.links.forum));
 
-            if(!string.IsNullOrEmpty(gogDetails.images?.icon))
+            if (!string.IsNullOrEmpty(gogDetails.images?.icon))
                 output.IconOptions.Add(new BasicImage("http:" + gogDetails.images.icon));
         }
 
         if (storeGame != null)
         {
-            output.InstallSize = ((ulong)storeGame.size) * 1024 * 1024;
+            output.InstallSize = (ulong)storeGame.size * 1024 * 1024;
 
             if (output.ReleaseDate == null && storeGame.globalReleaseDate != null)
                 output.ReleaseDate = new ReleaseDate(storeGame.globalReleaseDate.Value);
@@ -197,7 +193,7 @@ public class GogApiClient(IWebDownloader downloader, GOGMetadataSettings setting
         var parser = new HtmlParser();
         var document = parser.Parse(originalDescription);
         var firstChild = document.Body.FirstChild;
-        if (firstChild == null || firstChild.NodeType != NodeType.Element || !firstChild.HasChildNodes)
+        if (firstChild is not { NodeType: NodeType.Element } || !firstChild.HasChildNodes)
             return originalDescription;
 
         // It's possible to check if a description has a promo if the first element contains
@@ -213,7 +209,7 @@ public class GogApiClient(IWebDownloader downloader, GOGMetadataSettings setting
 
         // Remove all following <hr> and <br> elements that GOG adds after a promo
         var nextSibling = firstChild.NextSibling;
-        while (nextSibling != null && (nextSibling is IHtmlHrElement || nextSibling is IHtmlBreakRowElement))
+        while (nextSibling is IHtmlHrElement or IHtmlBreakRowElement)
         {
             document.Body.RemoveChild(nextSibling);
             nextSibling = firstChild.NextSibling;

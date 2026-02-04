@@ -19,7 +19,7 @@ public class ScraperManager
 
     public ScraperManager(IWebDownloader downloader, IPlatformUtility platformUtility)
     {
-        Initialize(FindAllDerivedTypes<BaseXboxScraper>().Select(t => (BaseXboxScraper)t.GetConstructor([typeof(IWebDownloader), typeof(IPlatformUtility)]).Invoke([downloader, platformUtility])));
+        Initialize(FindAllDerivedTypes<BaseXboxScraper>().Select(t => (BaseXboxScraper)t.GetConstructor([typeof(IWebDownloader), typeof(IPlatformUtility)])!.Invoke([downloader, platformUtility])));
     }
 
     public IEnumerable<XboxGameSearchResultItem> Search(XboxMetadataSettings settings, Game game, string searchString, bool onlyExactMatches = false)

@@ -25,7 +25,7 @@ indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{**/Models/**.cs,*Models.cs,*Model.cs}]
+[{**/Models/**.cs,**Models.cs,**Model.cs}]
 resharper_inconsistent_naming_highlighting = none
 resharper_class_never_instantiated_global_highlighting = none
 resharper_unused_auto_property_accessor_global_highlighting = none

@@ -74,7 +74,7 @@ public abstract class BaseAggregateMobyGamesDataCollector(MobyGamesApiClient api
         foreach (var platform in mobyGame.platforms)
         {
             gameDetails.Platforms.AddRange(platformUtility.GetPlatforms(platform.name));
-            if (settings.MatchPlatformsForReleaseDate && platformUtility.PlatformsOverlap(searchGame.Platforms, [platform.name]))
+            if (settings.MatchPlatformsForReleaseDate && platformUtility.PlatformsOverlap(searchGame?.Platforms, [platform.name]))
                 gameDetails.ReleaseDate = GetEarliestReleaseDate(gameDetails.ReleaseDate, platform.release_date.ParseReleaseDate());
         }
 
@@ -91,8 +91,8 @@ public abstract class BaseAggregateMobyGamesDataCollector(MobyGamesApiClient api
             gameDetails.Publishers.Add(FixCompanyName(pub.name));
 
         //images
-        foreach (var covergroup in MatchPlatforms(searchGame, mobyGame.covers, settings.Cover.MatchPlatforms))
-            gameDetails.CoverOptions.AddRange(covergroup.images.Select(ToIImageData));
+        foreach (var coverGroup in MatchPlatforms(searchGame, mobyGame.covers, settings.Cover.MatchPlatforms))
+            gameDetails.CoverOptions.AddRange(coverGroup.images.Select(ToIImageData));
 
         foreach (var screenshotGroup in MatchPlatforms(searchGame, mobyGame.screenshots, settings.Background.MatchPlatforms))
             gameDetails.BackgroundOptions.AddRange(screenshotGroup.images.Select(ToIImageData));

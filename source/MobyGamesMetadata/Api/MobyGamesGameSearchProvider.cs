@@ -29,18 +29,21 @@ public class MobyGamesGameSearchProvider(MobyGamesApiClient apiClient, MobyGames
             var output = Merge(scraperDetails, ToGameDetails(apiDetails, searchGame));
             return output;
         }
-        else if (settings.DataSource.HasFlag(DataSource.Scraping))
+
+        if (settings.DataSource.HasFlag(DataSource.Scraping))
         {
             var gameDetails = scraper.GetGameDetails(id);
             gameDetails.Description = gameDetails.Description.MakeHtmlUrlsAbsolute(gameDetails.Url);
             return gameDetails;
         }
-        else if (settings.DataSource.HasFlag(DataSource.Api))
+
+        if (settings.DataSource.HasFlag(DataSource.Api))
         {
             var apiDetails = searchResultGame ?? apiClient.GetMobyGame(id);
             var output = ToGameDetails(apiDetails, searchGame);
             return output;
         }
+
         return null;
     }
 

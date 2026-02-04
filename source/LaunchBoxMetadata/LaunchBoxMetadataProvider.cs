@@ -40,6 +40,7 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
                 if (platformUtility.PlatformsOverlap(options.GameData?.Platforms, game.Platform?.SplitLaunchBox()))
                     return foundGame = game;
             }
+
             return foundGame = new LaunchBoxGame();
         }
         else
@@ -196,7 +197,6 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
 
     public override IEnumerable<MetadataProperty> GetGenres(GetMetadataFieldArgs args)
     {
-
         return Split(FindGame().Genres) ?? base.GetGenres(args);
     }
 
@@ -283,11 +283,13 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
                 if (gameRegions.Any(gr => comparer.Equals(gr, regionSetting.Name) || (aliases != null && aliases.ContainsString(gr))))
                     output.Add(regionSetting.Name); //put any matched region at the top
             }
+
             foreach (var regionSetting in settings.Regions)
             {
                 if (regionSetting.Checked && !output.Contains(regionSetting.Name))
                     output.Add(regionSetting.Name); //add the rest of the enabled regions
             }
+
             return output;
         }
         else
@@ -330,14 +332,13 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
             img.BackgroundColor = MagickColor.FromRgba(0, 0, 0, 0);
             img.Extent(minSize, minSize, Gravity.Center);
         }
+
         var filename = Path.GetFileName(imgDetails.Url);
         return new MetadataFile(filename, img.ToByteArray());
     }
 
-    private class LaunchBoxImageFileOption : ImageFileOption
+    private class LaunchBoxImageFileOption(string path) : ImageFileOption(path)
     {
-        public LaunchBoxImageFileOption(string path) : base(path) { }
-
         public LaunchBoxImageDetails ImageDetails { get; set; }
 
         public static LaunchBoxImageFileOption FromImageDetails(LaunchBoxImageDetails imageDetails)
