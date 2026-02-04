@@ -87,7 +87,7 @@ public class PcGamingWikiHtmlParser(string html, PCGWGameController gameControll
 
         if (node != null)
         {
-            redirectPage = node.InnerHtml.HtmlDecode();
+            redirectPage = node.TextContent.HtmlDecode();
             return true;
         }
 
