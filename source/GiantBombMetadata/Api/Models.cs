@@ -140,6 +140,8 @@ public class GiantBombImage : IImageData
 
     int IImageData.Height => 0;
 
+    string IImageData.Description => Tags;
+
     IEnumerable<string> IImageData.Platforms => [];
 }
 
@@ -163,6 +165,8 @@ public class GiantBombCoverImage : IImageData
     int IImageData.Width => 0;
 
     int IImageData.Height => 0;
+
+    string IImageData.Description => Tags;
 
     IEnumerable<string> IImageData.Platforms => [];
 }

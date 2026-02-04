@@ -237,20 +237,16 @@ public abstract class GenericMetadataProvider<TSearchResult>(IGameSearchProvider
             return null;
 
         if (options.IsBackgroundDownload || images.Count == 1)
-        {
-            return new MetadataFile(images.First().Url);
-        }
-        else
-        {
-            var imageOptions = images?.Select(i => new ImgOption(i)).ToList<ImageFileOption>();
-            var selected = playniteApi.Dialogs.ChooseImageFile(imageOptions, caption);
-            var fullSizeUrl = (selected as ImgOption)?.Image.Url;
+            return new(images.First().Url);
 
-            if (fullSizeUrl == null)
-                return null;
+        var imageOptions = images.Select(i => new ImgOption(i)).ToList<ImageFileOption>();
+        var selected = playniteApi.Dialogs.ChooseImageFile(imageOptions, caption);
+        var fullSizeUrl = (selected as ImgOption)?.Image.Url;
 
-            return new MetadataFile(fullSizeUrl);
-        }
+        if (fullSizeUrl == null)
+            return null;
+
+        return new(fullSizeUrl);
     }
 
     protected class ImgOption : ImageFileOption

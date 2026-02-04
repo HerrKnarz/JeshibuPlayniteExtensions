@@ -8,6 +8,7 @@ public interface IImageData
     string ThumbnailUrl { get; }
     int Width { get; }
     int Height { get; }
+    public string Description { get; }
     IEnumerable<string> Platforms { get; }
 }
 
@@ -17,5 +18,6 @@ public class BasicImage(string url) : IImageData
     public string ThumbnailUrl { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
+    public string Description { get; set; }
     public IEnumerable<string> Platforms { get; set; } = [];
 }

@@ -23,7 +23,7 @@ public class CheckboxSetting
     public bool Checked { get; set; }
     public string Name { get; set; }
 
-    public CheckboxSetting()    {            }
+    public CheckboxSetting() { }
 
     public CheckboxSetting(string name, bool isChecked = false)
     {

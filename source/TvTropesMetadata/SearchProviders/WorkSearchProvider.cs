@@ -30,6 +30,8 @@ public class WorkSearchProvider(WorkScraper scraper, TvTropesMetadataSettings se
 
         public int Height { get; set; }
 
+        public string Description { get; }
+
         public IEnumerable<string> Platforms { get; set; } = new List<string>();
     }
 
