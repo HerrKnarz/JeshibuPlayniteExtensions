@@ -155,7 +155,7 @@ public class MobyGamesIdUtility : SingleExternalDatabaseIdUtility
 
 public class WikipediaIdUtility : SingleExternalDatabaseIdUtility
 {
-    private readonly Regex _idRegex = new(@"https?://(?<lang>[a-z]+)\.wikipedia\.org/wiki/(?<article>[^?]+)", RegexOptions.Compiled);
+    private readonly Regex _idRegex = new(@"https?://(?<lang>[a-z]+)\.(m\.)?wikipedia\.org/wiki/(?<article>[^?]+)", RegexOptions.Compiled);
 
     public override ExternalDatabase Database => ExternalDatabase.Wikipedia;
     public override IEnumerable<Guid> LibraryIds => [];
