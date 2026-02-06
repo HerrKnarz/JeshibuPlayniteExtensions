@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PlayniteExtensions.Tests.Common;
 
-public class FakeWebDownloader : IWebDownloader
+public partial class FakeWebDownloader : IWebDownloader
 {
     public class Redirect(string url, int depth = 0)
     {
