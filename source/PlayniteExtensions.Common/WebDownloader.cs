@@ -50,10 +50,10 @@ public class WebDownloader : IWebDownloader
     public string Accept { get; set; } = "text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
     public string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0";
 
-    public WebDownloader()
+    public WebDownloader(HttpMessageHandler messageHandler = null)
     {
         _cookieContainer = new DangerouslySimpleCookieContainer(new HttpClientHandler());
-        _httpClient = new HttpClient(_cookieContainer, false);
+        _httpClient = new HttpClient(messageHandler ?? _cookieContainer, false);
     }
 
     public DownloadStringResponse DownloadString(string url, Func<string, string, string> redirectUrlGetFunc = null, Func<string, CookieCollection> jsCookieGetFunc = null, string referer = null, Action<HttpRequestHeaders> headerSetter = null,
