@@ -95,7 +95,6 @@ function Get-ProjectNames {
         "steamtagsimporter"     = @("SteamTagsImporter")
         "tvtropes"              = @("TvTropesMetadata")
         "viveport"              = @("ViveportLibrary")
-        "wikipedia"             = @("WikipediaCategories")
         "xbox"                  = @("XboxMetadata")
     }
 
