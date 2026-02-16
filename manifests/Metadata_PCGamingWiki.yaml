@@ -250,3 +250,9 @@ Packages:
     PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/2025-12-29/PCGamingWikiMetadata_1_6_1.pext
     Changelog:
       - "Fixed: property bulk import menu option appeared in fullscreen mode, where it was not usable"
+  - Version: '1.6.2'
+    RequiredApiVersion: '6.11.0'
+    ReleaseDate: {NEWDATE}
+    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/{NEWDATE}/PCGamingWikiMetadata_1_6_2.pext
+    Changelog:
+      - "Fixed: article redirects were not parsing correctly"
