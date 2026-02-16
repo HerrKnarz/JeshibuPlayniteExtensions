@@ -65,3 +65,10 @@ Packages:
       - "Fixed FinalBurn Neo profile for RetroArch"
       - "Updated Azahar profile to accept .zcci ROMs (contributed by ppriest)"
       - "Added arcade profiles for Model 2 Emulator, Supermodel (Model 3), and Virtual Pinball X (all contributed by VALIS666)"
+  - Version: '1.9'
+    RequiredApiVersion: '6.2.0'
+    ReleaseDate: {NEWDATE}
+    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/{NEWDATE}/ExtraEmulatorProfiles_1_9.pext
+    Changelog:
+      - "Added Xenia Edge profile (Xbox 360)"
+      - "Added ISO scanning to RPCS3 import script. This looks in the .ISO file to determine the exact name, so isn't dependant on the ISO file name."
