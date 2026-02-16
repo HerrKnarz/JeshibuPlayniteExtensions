@@ -75,26 +75,25 @@ foreach ($game in $games)
     {
         try
         {
-            $DiskImage = Mount-DiskImage -ImagePath $ISOPath -StorageType ISO -NoDriveLetter -PassThru
-            New-PSDrive -Name ISOFile -PSProvider FileSystem -Root (Get-Volume -DiskImage $DiskImage).UniqueId
-            Push-Location ISOFile:
+            $DiskImage = Mount-DiskImage -ImagePath $game.FullName -StorageType ISO -NoDriveLetter -PassThru
+            New-PSDrive -Name ISOFile -PSProvider FileSystem -Root (Get-Volume -DiskImage $DiskImage).UniqueId | Out-Null
+            Push-Location ISOFile: | Out-Null
 
             try
             {
-                $paramSfoPath = (Get-ChildItem ISOFile:\PS3_GAME -Filter "param.sfo" -Recurse -File)[0]
+                $paramSfoPath = (Get-ChildItem ISOFile: -Filter "param.sfo" -Recurse -File | Where { $_.DirectoryName -like "*PS3_GAME*" })[0].FullName
 
                 $scannedGame.Serial = Get-ParamSfoValue $paramSfoPath "TITLE_ID"
                 if ($null -ne $scannedGame.Serial)
                 {
                     $scannedGame.Name = Get-ParamSfoValue $paramSfoPath "TITLE"
-                    $scannedGame
                 }
             }
             finally
             {
-                Pop-Location
-                Remove-PSDrive ISOFile
-                Dismount-DiskImage -DevicePath $DiskImage.DevicePath
+                Pop-Location | Out-Null
+                Remove-PSDrive ISOFile | Out-Null
+                Dismount-DiskImage -StorageType ISO -ImagePath $DiskImage.ImagePath | Out-Null
             }
         }
         catch
