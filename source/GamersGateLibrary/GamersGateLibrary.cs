@@ -141,6 +141,7 @@ public class GamersGateLibrary : LibraryPlugin
         {
             logger.Debug($"No install data found for {args.Game.Name}, ID: {args.Game.GameId}");
             PlayniteApi.Dialogs.ShowErrorMessage("No install data found.", "GamersGate game launch error");
+            yield break;
         }
 
         string path = Path.Combine(installData.InstallLocation, installData.RelativeExecutablePath);
