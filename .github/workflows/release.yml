@@ -7,7 +7,7 @@ name: Release Build
 
 jobs:
   build:
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
     steps:
       - uses: actions/checkout@v4
 

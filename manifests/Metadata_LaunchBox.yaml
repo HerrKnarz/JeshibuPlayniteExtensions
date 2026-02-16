@@ -179,7 +179,7 @@ Packages:
       - "Update Magick.NET to version used in Playnite 10.47"
   - Version: "0.10"
     RequiredApiVersion: '6.14.0'
-    ReleaseDate: {NEWDATE}
-    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/{NEWDATE}/LaunchBoxMetadata_0_10.pext
+    ReleaseDate: 2026-02-16
+    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/2026-02-16/LaunchBoxMetadata_0_10.pext
     Changelog:
       - "Added image size to image selection dialogs"

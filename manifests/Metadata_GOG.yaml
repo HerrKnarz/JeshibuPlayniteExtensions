@@ -27,7 +27,7 @@ Packages:
       - "Fixed platform matching failing to match some platforms if they'd been renamed"
   - Version: '0.3'
     RequiredApiVersion: '6.9.0'
-    ReleaseDate: {NEWDATE}
-    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/{NEWDATE}/GOGMetadata_0_3.pext
+    ReleaseDate: 2026-02-16
+    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/2026-02-16/GOGMetadata_0_3.pext
     Changelog:
       - "Added option to change background type priority"

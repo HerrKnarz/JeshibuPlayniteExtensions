@@ -75,7 +75,7 @@ Packages:
       - "Fixed platform matching failing to match some platforms if they'd been renamed"
   - Version: '0.5'
     RequiredApiVersion: '6.2.2'
-    ReleaseDate: {NEWDATE}
-    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/{NEWDATE}/RawgLibrary_0_5.pext
+    ReleaseDate: 2026-02-16
+    PackageUrl: https://github.com/Jeshibu/PlayniteExtensions/releases/download/2026-02-16/RawgLibrary_0_5.pext
     Changelog:
       - "Added image size to image selection dialogs"
