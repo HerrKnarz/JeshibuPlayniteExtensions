@@ -39,6 +39,14 @@ public class IgnApiClient(IWebDownloader downloader)
         return data?.ObjectSelectByTypeAndSlug.ImageGallery?.Images.Select(i => i.Url);
     }
 
+    public UserReviewAnalytics GetUserReviewAnalytics(string objectId)
+    {
+        var variables = new { objectId, feedbackCount = 0, recentReviewActivityCount = 0 };
+        var data = Call<UserReviewDataRoot>("UserReviewAnalytics", variables, "1af10aeda984ad7cee331faa63050e3c0a7d60fada216a65c52c0dbe8f1c6610");
+
+        return data?.UserReviewAnalytics;
+    }
+
     private T Call<T>(string operationName, object variables, string hash) where T: class
     {
         var extensions = new { persistedQuery = new { version = 1, sha256Hash = hash } };

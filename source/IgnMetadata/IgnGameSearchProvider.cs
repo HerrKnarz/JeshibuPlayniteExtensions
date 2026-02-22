@@ -37,7 +37,7 @@ public class IgnGameSearchProvider(IgnApiClient client, IPlatformUtility platfor
             AgeRatings = ignDetails.AgeRatings.ToList(),
             Platforms = ignDetails.Platforms.SelectMany(platformUtility.GetPlatforms).ToList(),
             ReleaseDate = ignDetails.ReleaseDate,
-            CriticScore = GetIgnReviewScore(ignDetails),
+            CriticScore = Get100Score(ignDetails.PrimaryReview?.Score),
         };
         gameDetails.Links.Add(new Link("IGN", $"https://www.ign.com/games/{slug}"));
 
@@ -48,12 +48,14 @@ public class IgnGameSearchProvider(IgnApiClient client, IPlatformUtility platfor
         if (backgrounds != null)
             gameDetails.BackgroundOptions.AddRange(backgrounds);
 
+        var userReviews = client.GetUserReviewAnalytics(searchResult.Id);
+        gameDetails.CommunityScore = Get100Score(userReviews?.Score);
+
         return gameDetails;
     }
 
-    private static int? GetIgnReviewScore(IgnGame game)
+    private static int? Get100Score(double? score)
     {
-        var score = game.PrimaryReview?.Score;
         if (score == null)
             return null;
 

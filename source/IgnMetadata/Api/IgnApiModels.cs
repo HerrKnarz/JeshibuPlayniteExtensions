@@ -232,3 +232,16 @@ public class IgnImage
     public string Caption;
     public string Url;
 }
+
+public class UserReviewDataRoot
+{
+    public UserReviewAnalytics UserReviewAnalytics { get; set; }
+}
+
+public class UserReviewAnalytics
+{
+    public int? Liked { get; set; }
+    public int? Disliked { get; set; }
+    public double? Score { get; set; }
+    public int? ScoreCount { get; set; }
+}
