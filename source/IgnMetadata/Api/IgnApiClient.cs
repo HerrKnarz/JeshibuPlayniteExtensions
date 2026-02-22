@@ -36,7 +36,7 @@ public class IgnApiClient(IWebDownloader downloader)
         var variables = new { slug, objectType = "Game", count = 10 };
         var data = Call<IgnGetImagesResultData>("ObjectImageGallery", variables, "06204b0f0871f8382e3adab7d1c59399e6c17ac94bff575c20a12ebf9d880b86");
 
-        return data?.ImageGallery?.Images.Select(i => i.Url);
+        return data?.ObjectSelectByTypeAndSlug.ImageGallery?.Images.Select(i => i.Url);
     }
 
     private T Call<T>(string operationName, object variables, string hash) where T: class

@@ -30,6 +30,11 @@ public class IgnGetGameResultData
 
 public class IgnGetImagesResultData
 {
+    public ImageObject ObjectSelectByTypeAndSlug;
+}
+
+public class ImageObject
+{
     public IgnImageGalleryObject ImageGallery;
 }
 
@@ -59,6 +64,7 @@ public class IgnGame : IGameSearchResult
     public IgnAttribute[] Producers = [];
     public IgnAttribute[] Publishers = [];
     public IgnObjectRegion[] ObjectRegions = [];
+    public IgnReview PrimaryReview;
 
     public List<string> Names
     {
@@ -131,12 +137,23 @@ public class IgnGame : IGameSearchResult
     }
 }
 
+public class IgnReview
+{
+    public string Id;
+    public string ArticleUrl;
+    public bool? EditorsChoice;
+    public double? Score;
+    public string ScoreText;
+    public string ScoreSummary;
+}
+
 public class IgnObjectRegion
 {
     /// <summary>
     /// The game's name for this particular release - often empty
     /// </summary>
     public string Name;
+
     public string Region;
     public IgnRelease[] Releases = [];
 
