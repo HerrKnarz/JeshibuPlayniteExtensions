@@ -1,25 +1,32 @@
-﻿using Playnite.SDK;
+﻿using KNARZhelper.ScreenshotsCommon;
+using LaunchBoxMetadata.GenreImport;
+using LaunchBoxMetadata.ScreenshotUtilitiesIntegration;
+using Playnite.SDK;
 using Playnite.SDK.Events;
+using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 using PlayniteExtensions.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Controls;
-using LaunchBoxMetadata.GenreImport;
 
 namespace LaunchBoxMetadata;
 
-public class LaunchBoxMetadata : MetadataPlugin
+public class LaunchBoxMetadata : MetadataPlugin, IScreenshotProviderPlugin
 {
     //So for anyone using GongSolutions.Wpf.DragDrop - be aware you have to instantiate something from it before referencing the package in your XAML
     private readonly GongSolutions.Wpf.DragDrop.DefaultDragHandler dropInfo = new();
+
     private readonly ILogger logger = LogManager.GetLogger();
     private readonly IPlatformUtility platformUtility;
 
     private LaunchBoxMetadataSettingsViewModel Settings { get; set; }
     private LaunchBoxWebScraper WebScraper { get; set; }
+
+    private ScreenshotUtilitiesIntegrator _screenshotUtilitiesIntegrator;
 
     public override Guid Id { get; } = Guid.Parse("3b1908f2-de02-48c9-9633-10d978903652");
 
@@ -42,6 +49,10 @@ public class LaunchBoxMetadata : MetadataPlugin
 
     public override string Name => "LaunchBox";
 
+    string IScreenshotProviderPlugin.Name { get; set; } = "LaunchBox";
+    public bool SupportsAutomaticScreenshots { get; set; } = true;
+    public bool SupportsScreenshotSearch { get; set; } = true;
+
     public LaunchBoxMetadata(IPlayniteAPI api) : base(api)
     {
         Settings = new LaunchBoxMetadataSettingsViewModel(this);
@@ -51,6 +62,8 @@ public class LaunchBoxMetadata : MetadataPlugin
         };
         platformUtility = new PlatformUtility(PlayniteApi);
         WebScraper = new LaunchBoxWebScraper(new WebDownloader());
+
+        _screenshotUtilitiesIntegrator = new ScreenshotUtilitiesIntegrator(Name, Id);
     }
 
     public override void OnApplicationStarted(OnApplicationStartedEventArgs args) => CheckConfiguration();
@@ -128,4 +141,12 @@ public class LaunchBoxMetadata : MetadataPlugin
 
         return true;
     }
+
+    public async Task<bool> CleanUpAsync(Game game) => await ScreenshotHelper.DeleteOrphanedJsonFiles(game.Id, Id);
+
+    public async Task<bool> GetScreenshotsAsync(Game game, int daysSinceLastUpdate, bool forceUpdate) => await _screenshotUtilitiesIntegrator.FetchScreenshotsAsync(game, daysSinceLastUpdate, forceUpdate);
+
+    public string GetScreenshotSearchResult(Game game, string searchTerm) => _screenshotUtilitiesIntegrator.GetScreenshotSearchResult(game, searchTerm);
+
+    public async Task<bool> GetScreenshotsManualAsync(Game game, string gameIdentifier) => await _screenshotUtilitiesIntegrator.FetchScreenshotsAsync(game, 0, true, gameIdentifier);
 }
