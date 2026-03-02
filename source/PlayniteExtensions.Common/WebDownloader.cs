@@ -20,6 +20,7 @@ public interface IWebDownloader
     /// The total collection of cookies used both as input for requests and output for responses
     /// </summary>
     CookieContainer Cookies { get; }
+
     string UserAgent { get; set; }
 
     DownloadStringResponse DownloadString(string url, Func<string, string, string> redirectUrlGetFunc = null, Func<string, CookieCollection> jsCookieGetFunc = null, string referer = null, Action<HttpRequestHeaders> headerSetter = null,
@@ -60,7 +61,9 @@ public class WebDownloader : IWebDownloader
         string contentType = null, bool throwExceptionOnErrorResponse = true, int maxRedirectDepth = 7, CancellationToken cancellationToken = default, bool getContent = true)
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        var output = DownloadStringAsync(url, redirectUrlGetFunc, jsCookieGetFunc, referer, headerSetter, contentType, throwExceptionOnErrorResponse, maxRedirectDepth, 0, cancellationToken, getContent).Result;
+
+        var output = AsyncHelper.RunSync(async () => await DownloadStringAsync(url, redirectUrlGetFunc, jsCookieGetFunc, referer, headerSetter, contentType, throwExceptionOnErrorResponse, maxRedirectDepth, 0, cancellationToken, getContent));
+
         sw.Stop();
         _logger.Info($"Call to {url} completed in {sw.Elapsed}, status: {output?.StatusCode}");
         return output;
@@ -327,5 +330,49 @@ public static class CookieContainerExtensions
             output.Expires = cookie.Expires.Value;
 
         return output;
+    }
+}
+
+public static class AsyncHelper
+{
+    private static readonly TaskFactory MyTaskFactory = new
+        TaskFactory(CancellationToken.None,
+            TaskCreationOptions.None,
+            TaskContinuationOptions.None,
+            TaskScheduler.Default);
+
+    public static TResult RunSync<TResult>(Func<Task<TResult>> func)
+    {
+        return MyTaskFactory
+            .StartNew(func)
+            .Unwrap()
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    public static void RunSync(Func<Task> func)
+    {
+        MyTaskFactory
+            .StartNew(func)
+            .Unwrap()
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
+    {
+        using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+        {
+            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+            if (completedTask == task)
+            {
+                timeoutCancellationTokenSource.Cancel();
+                return await task;  // Very important in order to propagate exceptions
+            }
+            else
+            {
+                throw new TimeoutException("The operation has timed out.");
+            }
+        }
     }
 }
