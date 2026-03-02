@@ -17,6 +17,8 @@ namespace LaunchBoxMetadata;
 
 public class LaunchBoxMetadata : MetadataPlugin, IScreenshotProviderPlugin
 {
+    private const string MetadataSourceName = "LaunchBox";
+
     //So for anyone using GongSolutions.Wpf.DragDrop - be aware you have to instantiate something from it before referencing the package in your XAML
     private readonly GongSolutions.Wpf.DragDrop.DefaultDragHandler dropInfo = new();
 
@@ -47,9 +49,8 @@ public class LaunchBoxMetadata : MetadataPlugin, IScreenshotProviderPlugin
         MetadataField.Links,
     ];
 
-    public override string Name => "LaunchBox";
-
-    string IScreenshotProviderPlugin.Name { get; set; } = "LaunchBox";
+    public override string Name => MetadataSourceName;
+    public string ProviderName { get; set; } = MetadataSourceName;
     public bool SupportsAutomaticScreenshots { get; set; } = true;
     public bool SupportsScreenshotSearch { get; set; } = true;
 
@@ -63,7 +64,7 @@ public class LaunchBoxMetadata : MetadataPlugin, IScreenshotProviderPlugin
         platformUtility = new PlatformUtility(PlayniteApi);
         WebScraper = new LaunchBoxWebScraper(new WebDownloader());
 
-        _screenshotUtilitiesIntegrator = new ScreenshotUtilitiesIntegrator(Name, Id);
+        _screenshotUtilitiesIntegrator = new ScreenshotUtilitiesIntegrator(this, Settings.Settings, WebScraper, platformUtility);
     }
 
     public override void OnApplicationStarted(OnApplicationStartedEventArgs args) => CheckConfiguration();

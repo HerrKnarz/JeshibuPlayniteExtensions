@@ -1,25 +1,104 @@
 ﻿using KNARZhelper;
+using KNARZhelper.MetadataCommon;
 using KNARZhelper.ScreenshotsCommon;
 using KNARZhelper.ScreenshotsCommon.Models;
-using Playnite.SDK;
+using LaunchBoxMetadata.Models;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
+using PlayniteExtensions.Common;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaunchBoxMetadata.ScreenshotUtilitiesIntegration;
 
-public class ScreenshotUtilitiesIntegrator(string name, Guid id)
+public class ScreenshotUtilitiesIntegrator(LaunchBoxMetadata plugin, LaunchBoxMetadataSettings settings, LaunchBoxWebScraper scraper, IPlatformUtility platformUtility)
 {
-    // TODO: change these methods to use the ones provided by the addon. Mainly look into
-    // GetImageDetails in LaunchBoxMetadataProvider.
+    private Game _game;
+    private ScreenshotGroup _screenshotGroup;
 
-    public async Task<bool> FetchScreenshotsAsync(Game game, int daysSinceLastUpdate, bool forceUpdate, string gogId = default)
+    private string GetDatabaseUrl(string databaseId = default)
     {
-        Game _game;
-        ScreenshotGroup _screenshotGroup;
+        string searchUrl = default;
 
+        if (databaseId != default && long.TryParse(databaseId, out var dbIdLong))
+        {
+            searchUrl = scraper.GetLaunchBoxGamesDatabaseUrl(dbIdLong);
+        }
+
+        if (searchUrl == default)
+        {
+            searchUrl = _screenshotGroup.GameIdentifier;
+        }
+
+        if (searchUrl == default)
+        {
+            var link = MetadataHelper.GetLink(_game, new System.Text.RegularExpressions.Regex(@"gamesdb\.launchbox-app\.com\/games\/details\/"));
+
+            if (link != null)
+            {
+                searchUrl = link.Url;
+            }
+        }
+
+        if (searchUrl == default)
+        {
+            var foundGame = LaunchBoxHelper.FindGameInBackground(new LaunchBoxDatabase(plugin.GetPluginUserDataPath()), _game, platformUtility);
+
+            searchUrl = scraper.GetLaunchBoxGamesDatabaseUrl(foundGame.DatabaseID);
+        }
+
+        return searchUrl;
+    }
+
+    public async Task<bool> LoadScreenshotsFromSourceAsync()
+    {
+        var url = _screenshotGroup.GameIdentifier;
+
+        var updated = false;
+
+        try
+        {
+            // TODO: change settings.Background to dedicated settings for screenshots!
+            var whitelistedImgTypes = settings.Background.ImageTypes.Where(t => t.Checked).Select(t => t.Name).ToList();
+            var whitelistedRegions = LaunchBoxHelper.GetWhitelistedRegions(_game?.Regions, settings);
+
+            var imageDetails = LaunchBoxHelper.GetImageDetails(scraper, url).Where(i => LaunchBoxHelper.FilterImage(i, whitelistedImgTypes, whitelistedRegions, settings.Background)).ToList();
+
+            if (imageDetails == null || !imageDetails.Any())
+            {
+                return false;
+            }
+
+            var filteredimageDetails = imageDetails
+                .Where(i => !_screenshotGroup.Screenshots.Any(es => es.Path.Equals(i.Url)))
+                .OrderBy(i => whitelistedImgTypes.IndexOf(i.Type))
+                .ThenBy(i => whitelistedRegions.IndexOf(i.Region))
+                .ToList();
+
+            foreach (var image in filteredimageDetails)
+            {
+                _screenshotGroup.Screenshots.Add(new Screenshot(image.Url)
+                {
+                    ThumbnailPath = image.ThumbnailUrl,
+                    Name = image.Type,
+                    SortOrder = imageDetails.IndexOf(image)
+                });
+            }
+
+            updated = true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
+
+        return updated;
+    }
+
+    public async Task<bool> FetchScreenshotsAsync(Game game, int daysSinceLastUpdate, bool forceUpdate, string databaseId = default)
+    {
         try
         {
             // return when the main addon isn't installed.
@@ -33,7 +112,7 @@ public class ScreenshotUtilitiesIntegrator(string name, Guid id)
 
             var fileExists = false;
 
-            (fileExists, _screenshotGroup) = ScreenshotHelper.LoadGroup(_game, name, id);
+            (fileExists, _screenshotGroup) = ScreenshotHelper.LoadGroup(_game, plugin.ProviderName, plugin.Id);
 
             // return if we don't want to force an update and the last update was inside the days configured.
             if (!forceUpdate
@@ -43,25 +122,25 @@ public class ScreenshotUtilitiesIntegrator(string name, Guid id)
                 return false;
             }
 
+            // Get the identifying url to search for.
+            var searchUrl = GetDatabaseUrl(databaseId);
+
+            if (string.IsNullOrEmpty(searchUrl))
+            {
+                return false;
+            }
+
             // Return if a game was searched and it's the one we already have.
-            if (gogId != default && gogId.Equals(_screenshotGroup.GameIdentifier))
+            if (searchUrl != default && searchUrl.Equals(_screenshotGroup.GameIdentifier))
             {
                 return false;
             }
 
-            // Get the right name to search for.
-            var searchName = GetGogId(gogId);
-
-            if (string.IsNullOrEmpty(searchName))
-            {
-                return false;
-            }
-
-            // We need to reset the file if we got a new gogId from the method call and it's not the
+            // We need to reset the file if we got a new id from the method call and it's not the
             // same we already got.
-            if (!fileExists || (gogId != default && !searchName.Equals(_screenshotGroup.GameIdentifier)))
+            if (!fileExists || (databaseId != default && !searchUrl.Equals(_screenshotGroup.GameIdentifier)))
             {
-                _screenshotGroup.GameIdentifier = searchName;
+                _screenshotGroup.GameIdentifier = searchUrl;
 
                 _screenshotGroup.Screenshots.Clear();
             }
@@ -81,22 +160,29 @@ public class ScreenshotUtilitiesIntegrator(string name, Guid id)
 
     public string GetScreenshotSearchResult(Game game, string searchTerm)
     {
-        var gogSearchResult = ApiHelper.GetJsonFromApi<GogSearchResult>($"{_searchUrl}{searchTerm.RemoveDiacritics().UrlEncode()}", Name);
-
-        var searchResults = new List<GenericItemOption>();
-
-        if (!gogSearchResult?.Products?.Any() ?? true)
+        try
         {
-            return null;
+            var results = new LaunchBoxDatabase(plugin.GetPluginUserDataPath()).SearchGames(searchTerm).Select(LaunchBoxGameItemOption.FromLaunchBoxGame).ToList();
+
+            if (!results?.Any() ?? true)
+            {
+                return null;
+            }
+
+            var result = new List<ScreenshotSearchResult>(results.Select(item => new ScreenshotSearchResult
+            {
+                Name = item.Name,
+                Description = item.Description,
+                Identifier = item.Game.DatabaseID.ToString()
+            }));
+
+            return Serialization.ToJson(result);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Error loading data for game {game.Name}");
         }
 
-        var result = new List<ScreenshotSearchResult>(gogSearchResult.Products.Select(product => new ScreenshotSearchResult
-        {
-            Name = product.Title,
-            Description = $"{product.ReleaseDate} -  ID {product.Id}",
-            Identifier = product.Id
-        }));
-
-        return Serialization.ToJson(result);
+        return null;
     }
 }
