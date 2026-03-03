@@ -24,9 +24,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Playnite-KNARZhelper\KNARZhelper\FilesCommon\FileDownloader.cs" Link="ScreenshotUtilitiesIntegration\Shared\FilesCommon\FileDownloader.cs" />
     <Compile Include="..\Playnite-KNARZhelper\KNARZhelper\FilesCommon\FileHelper.cs" Link="ScreenshotUtilitiesIntegration\Shared\FilesCommon\FileHelper.cs" />
-    <Compile Include="..\Playnite-KNARZhelper\KNARZhelper\FilesCommon\ImageHelper.cs" Link="ScreenshotUtilitiesIntegration\Shared\FilesCommon\ImageHelper.cs" />
     <Compile Include="..\Playnite-KNARZhelper\KNARZhelper\Log.cs" Link="ScreenshotUtilitiesIntegration\Shared\Log.cs" />
     <Compile Include="..\Playnite-KNARZhelper\KNARZhelper\MetadataCommon\MetadataHelper.cs" Link="ScreenshotUtilitiesIntegration\Shared\MetadataCommon\MetadataHelper.cs" />
     <Compile Include="..\Playnite-KNARZhelper\KNARZhelper\MiscHelper.cs" Link="ScreenshotUtilitiesIntegration\Shared\MiscHelper.cs" />
