@@ -27,8 +27,7 @@ public class LaunchBoxMetadata : MetadataPlugin, IScreenshotProviderPlugin
 
     private LaunchBoxMetadataSettingsViewModel Settings { get; set; }
     private LaunchBoxWebScraper WebScraper { get; set; }
-
-    private ScreenshotUtilitiesIntegrator _screenshotUtilitiesIntegrator;
+    private ScreenshotUtilitiesIntegrator ScreenshotUtilitiesIntegrator => new(this, Settings.Settings, WebScraper, platformUtility);
 
     public override Guid Id { get; } = Guid.Parse("3b1908f2-de02-48c9-9633-10d978903652");
 
@@ -63,8 +62,6 @@ public class LaunchBoxMetadata : MetadataPlugin, IScreenshotProviderPlugin
         };
         platformUtility = new PlatformUtility(PlayniteApi);
         WebScraper = new LaunchBoxWebScraper(new WebDownloader());
-
-        _screenshotUtilitiesIntegrator = new ScreenshotUtilitiesIntegrator(this, Settings.Settings, WebScraper, platformUtility);
     }
 
     public override void OnApplicationStarted(OnApplicationStartedEventArgs args) => CheckConfiguration();
@@ -145,9 +142,9 @@ public class LaunchBoxMetadata : MetadataPlugin, IScreenshotProviderPlugin
 
     public async Task<bool> CleanUpAsync(Game game) => await ScreenshotHelper.DeleteOrphanedJsonFiles(game.Id, Id);
 
-    public async Task<bool> GetScreenshotsAsync(Game game, int daysSinceLastUpdate, bool forceUpdate) => await _screenshotUtilitiesIntegrator.FetchScreenshotsAsync(game, daysSinceLastUpdate, forceUpdate);
+    public async Task<bool> GetScreenshotsAsync(Game game, int daysSinceLastUpdate, bool forceUpdate) => await ScreenshotUtilitiesIntegrator.FetchScreenshotsAsync(game, daysSinceLastUpdate, forceUpdate);
 
-    public string GetScreenshotSearchResult(Game game, string searchTerm) => _screenshotUtilitiesIntegrator.GetScreenshotSearchResult(game, searchTerm);
+    public string GetScreenshotSearchResult(Game game, string searchTerm) => ScreenshotUtilitiesIntegrator.GetScreenshotSearchResult(game, searchTerm);
 
-    public async Task<bool> GetScreenshotsManualAsync(Game game, string gameIdentifier) => await _screenshotUtilitiesIntegrator.FetchScreenshotsAsync(game, 0, true, gameIdentifier);
+    public async Task<bool> GetScreenshotsManualAsync(Game game, string gameIdentifier) => await ScreenshotUtilitiesIntegrator.FetchScreenshotsAsync(game, 0, true, gameIdentifier);
 }
