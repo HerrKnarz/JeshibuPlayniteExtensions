@@ -23,8 +23,8 @@ public static class LaunchBoxHelper
     }
 
     /// <summary>
-    /// This should always be a sequence of characters that is in no game (alternate) name Obvious
-    /// things like ; or , are in quite a few game names, thus 4 pipe symbols
+    /// This should always be a sequence of characters that is in no game (alternate) name
+    /// Obvious things like ; or , are in quite a few game names, thus 4 pipe symbols
     /// </summary>
     public const string AliasSeparator = "||||";
 
@@ -92,7 +92,7 @@ public static class LaunchBoxHelper
 
             if (platformUtility.PlatformsOverlap(gameData?.Platforms, game.Platform?.SplitLaunchBox()))
                 return game;
-        }
+            }
 
         return new LaunchBoxGame();
     }
