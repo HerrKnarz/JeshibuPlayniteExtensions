@@ -98,9 +98,7 @@ public class ScreenshotUtilitiesIntegrator(LaunchBoxMetadata plugin, LaunchBoxMe
             (var fileExists, var screenshotGroup) = ScreenshotHelper.LoadGroup(game, plugin.ProviderName, plugin.Id);
 
             // return if we don't want to force an update and the last update was inside the days configured.
-            if (!forceUpdate
-                && screenshotGroup.LastUpdate != null
-                && (screenshotGroup.LastUpdate > DateTime.Now.AddDays(daysSinceLastUpdate * -1)))
+            if (!forceUpdate && (screenshotGroup.LastUpdate > DateTime.Now.AddDays(daysSinceLastUpdate * -1)))
                 return false;
 
             // Get the identifying url to search for.
