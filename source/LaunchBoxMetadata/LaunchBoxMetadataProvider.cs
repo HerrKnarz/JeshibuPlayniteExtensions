@@ -24,9 +24,9 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
 
     private LaunchBoxGame FindGame()
     {
-        return foundGame ?? (options.IsBackgroundDownload
-            ? (foundGame = LaunchBoxHelper.FindGameInBackground(database, options.GameData, platformUtility))
-            : (foundGame = LaunchBoxHelper.FindGameViaSearch(database, options.GameData)));
+        return foundGame ??= (options.IsBackgroundDownload
+            ? LaunchBoxHelper.FindGameInBackground(database, options.GameData, platformUtility)
+            : LaunchBoxHelper.FindGameViaSearch(database, options.GameData));
     }
 
     private string GetLaunchBoxGamesDatabaseUrl(LaunchBoxGame game)
@@ -51,7 +51,7 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
 
         var detailsUrl = GetLaunchBoxGamesDatabaseUrl(game);
 
-        return foundImages = [.. LaunchBoxHelper.GetImageDetails(scraper, detailsUrl, id)];
+        return foundImages = LaunchBoxHelper.GetImageDetails(scraper, detailsUrl, id).ToList();
     }
 
     private IEnumerable<MetadataProperty> Split(string str)
