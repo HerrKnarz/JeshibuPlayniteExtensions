@@ -51,11 +51,10 @@ public class ScreenshotUtilitiesIntegrator(LaunchBoxMetadata plugin, LaunchBoxMe
 
         try
         {
-            // TODO: change settings.Background to dedicated settings for screenshots!
-            var whitelistedImgTypes = settings.Background.ImageTypes.Where(t => t.Checked).Select(t => t.Name).ToList();
+            var whitelistedImgTypes = settings.ScreenshotUtilities.ImageTypes.Where(t => t.Checked).Select(t => t.Name).ToList();
             var whitelistedRegions = LaunchBoxHelper.GetWhitelistedRegions(game?.Regions, settings);
 
-            var imageDetails = LaunchBoxHelper.GetImageDetails(scraper, url).Where(i => LaunchBoxHelper.FilterImage(i, whitelistedImgTypes, whitelistedRegions, settings.Background)).ToList();
+            var imageDetails = LaunchBoxHelper.GetImageDetails(scraper, url).Where(i => LaunchBoxHelper.FilterImage(i, whitelistedImgTypes, whitelistedRegions, settings.ScreenshotUtilities)).ToList();
 
             if (imageDetails == null || !imageDetails.Any())
                 return false;
@@ -68,11 +67,34 @@ public class ScreenshotUtilitiesIntegrator(LaunchBoxMetadata plugin, LaunchBoxMe
 
             foreach (var image in filteredimageDetails)
             {
+                var mediaType = MediaType.Screenshot;
+
+                mediaType = image.Type.Contains("Screenshot") ? MediaType.Screenshot
+                    : image.Type.Contains("Advertisement") ? MediaType.Advertisement
+                    : image.Type.Contains("Background") ? MediaType.Background
+                    : image.Type.Contains("Banner") ? MediaType.Banner
+                    : image.Type.Contains("Box - Front") ? MediaType.BoxFront
+                    : image.Type.Contains("Box - Back") ? MediaType.BoxBack
+                    : image.Type.Contains("Box - Spine") ? MediaType.BoxSpine
+                    : image.Type.Contains("Box - 3D") ? MediaType.Box3D
+                    : image.Type.Contains("Logo") ? MediaType.Logo
+                    : image.Type.Contains("Disc") ? MediaType.Disc
+                    : image.Type.Contains("Cart - ") ? MediaType.Cartridge
+                    : image.Type.Contains("Arcade - Cabinet") ? MediaType.ArcadeCabinet
+                    : image.Type.Contains("Arcade - Circuit Board") ? MediaType.ArcadeCircuit
+                    : image.Type.Contains("Arcade - Control Panel") ? MediaType.ArcadeControlPanel
+                    : image.Type.Contains("Arcade - Controls Information") ? MediaType.ArcadeControlsInfo
+                    : image.Type.Contains("Arcade - Marquee") ? MediaType.ArcadeMarquee
+                    : image.Type.Contains("Icon") ? MediaType.Icon
+                    : image.Type.Contains("Poster") ? MediaType.Poster
+                    : MediaType.Unknown;
+
                 screenshotGroup.Screenshots.Add(new Screenshot(image.Url)
                 {
                     ThumbnailPath = image.ThumbnailUrl,
                     Name = image.Type,
-                    SortOrder = imageDetails.IndexOf(image)
+                    SortOrder = imageDetails.IndexOf(image),
+                    Type = mediaType
                 });
             }
 
