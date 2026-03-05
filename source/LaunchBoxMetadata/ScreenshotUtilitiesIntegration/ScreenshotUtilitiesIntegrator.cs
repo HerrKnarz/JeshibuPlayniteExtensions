@@ -93,7 +93,7 @@ public class ScreenshotUtilitiesIntegrator(LaunchBoxMetadata plugin, LaunchBoxMe
                 {
                     ThumbnailPath = image.ThumbnailUrl,
                     Name = image.Type,
-                    SortOrder = imageDetails.IndexOf(image),
+                    SortOrder = filteredimageDetails.IndexOf(image),
                     Type = mediaType
                 });
             }
