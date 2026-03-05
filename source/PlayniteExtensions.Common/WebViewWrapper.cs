@@ -21,7 +21,6 @@ public class WebViewResponse
     public string Content { get; set; }
 }
 
-
 /// <summary>
 /// Intended for use for only one request
 /// </summary>

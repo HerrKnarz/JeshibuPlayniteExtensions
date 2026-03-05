@@ -41,7 +41,7 @@
       </ItemsControl.ItemTemplate>
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
-          <StackPanel Grid.Row="3" Margin="10" Orientation="Horizontal"/>
+          <StackPanel Margin="10" Orientation="Horizontal"/>
         </ItemsPanelTemplate>
       </ItemsControl.ItemsPanel>
     </ItemsControl>

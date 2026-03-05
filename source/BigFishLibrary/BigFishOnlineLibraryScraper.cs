@@ -115,7 +115,7 @@ public class BigFishOnlineLibraryScraper(IPlayniteAPI playniteApi, IWebDownloade
                 await Task.Delay(millisecondsExtraDelay);
 
             var scriptResult = await webView.EvaluateScriptAsync(script);
-            if (scriptResult.Success && scriptResult?.Result != null)
+            if (scriptResult.Success && scriptResult.Result != null)
                 return scriptResult.Result;
         }
 

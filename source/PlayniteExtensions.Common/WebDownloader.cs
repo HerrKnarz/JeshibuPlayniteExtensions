@@ -20,6 +20,7 @@ public interface IWebDownloader
     /// The total collection of cookies used both as input for requests and output for responses
     /// </summary>
     CookieContainer Cookies { get; }
+
     string UserAgent { get; set; }
 
     DownloadStringResponse DownloadString(string url, Func<string, string, string> redirectUrlGetFunc = null, Func<string, CookieCollection> jsCookieGetFunc = null, string referer = null, Action<HttpRequestHeaders> headerSetter = null,

@@ -62,29 +62,24 @@ public class FriendSourceSettings : ObservableObject
 
             webView.OpenDialog();
         }
+
         OnPropertyChanged(nameof(IsAuthenticated));
     }
 
-    [DontSerialize]
-    public RelayCommand RefreshCommand => new(SetFriends);
+    [DontSerialize] public RelayCommand RefreshCommand => new(SetFriends);
 
-    [DontSerialize]
-    public RelayCommand AuthenticateCommand => new(BackgroundAction(Login));
+    [DontSerialize] public RelayCommand AuthenticateCommand => new(BackgroundAction(Login));
 
-    [DontSerialize]
-    public IFriendsGamesClient Client { get; set; }
+    [DontSerialize] public IFriendsGamesClient Client { get; set; }
 
     [DontSerialize]
     public bool IsAuthenticated => Client.IsAuthenticatedAsync().Result;
 
-    [DontSerialize]
-    public string HeaderText => $"{Name} ({Friends.Count} friends)";
+    [DontSerialize] public string HeaderText => $"{Name} ({Friends.Count} friends)";
 
-    [DontSerialize]
-    internal IPlayniteAPI PlayniteApi { get; set; }
+    [DontSerialize] internal IPlayniteAPI PlayniteApi { get; set; }
 
-    [DontSerialize]
-    private readonly ILogger logger = LogManager.GetLogger();
+    [DontSerialize] private readonly ILogger logger = LogManager.GetLogger();
 
     [DontSerialize]
     public AuthStatus AuthStatus
@@ -93,10 +88,7 @@ public class FriendSourceSettings : ObservableObject
         {
             try
             {
-                if (IsAuthenticated)
-                    return AuthStatus.Ok;
-                else
-                    return AuthStatus.AuthRequired;
+                return IsAuthenticated ? AuthStatus.Ok : AuthStatus.AuthRequired;
             }
             catch (Exception e)
             {

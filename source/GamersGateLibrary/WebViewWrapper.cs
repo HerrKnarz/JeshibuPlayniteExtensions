@@ -15,27 +15,27 @@ public interface IWebViewWrapper : IDisposable
 /// </summary>
 public class WebViewWrapper : IWebViewWrapper
 {
-    public WebViewWrapper(IPlayniteAPI playniteAPI, int width = 675, int height = 600, bool offscreen = false, int timeoutSeconds = 60)
+    public WebViewWrapper(IPlayniteAPI playniteApi, int width = 675, int height = 600, bool offscreen = false, int timeoutSeconds = 60)
     {
         Offscreen = offscreen;
         TimeoutSeconds = timeoutSeconds;
-        view = System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        _view = System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             IWebView v = offscreen
-                ? playniteAPI.WebViews.CreateOffscreenView()
-                : playniteAPI.WebViews.CreateView(width, height, Colors.Black);
+                ? playniteApi.WebViews.CreateOffscreenView()
+                : playniteApi.WebViews.CreateView(width, height, Colors.Black);
 
             if (!offscreen)
                 v.Open();
 
             return v;
         });
-        view.LoadingChanged += View_LoadingChanged;
+        _view.LoadingChanged += View_LoadingChanged;
     }
 
-    private readonly IWebView view;
-    private readonly ILogger logger = LogManager.GetLogger();
-    private readonly object requestLifespanLock = new();
+    private readonly IWebView _view;
+    private readonly ILogger _logger = LogManager.GetLogger();
+    private readonly object _requestLifespanLock = new();
     public bool Offscreen { get; }
     public int TimeoutSeconds { get; }
     public string TargetUrl { get; private set; }
@@ -43,14 +43,14 @@ public class WebViewWrapper : IWebViewWrapper
 
     public string DownloadPageSource(string targetUrl)
     {
-        lock (requestLifespanLock)
+        lock (_requestLifespanLock)
         {
-            logger.Debug($"Getting {targetUrl}, timeout {TimeoutSeconds} seconds");
+            _logger.Debug($"Getting {targetUrl}, timeout {TimeoutSeconds} seconds");
             TargetUrl = targetUrl;
 
             DownloadCompletionSource = new TaskCompletionSource<string>();
 
-            view.Navigate(targetUrl);
+            _view.Navigate(targetUrl);
 
             DownloadCompletionSource.Task.Wait(TimeoutSeconds * 1000);
             if (DownloadCompletionSource.Task.IsCompleted)
@@ -73,7 +73,7 @@ public class WebViewWrapper : IWebViewWrapper
 
     private bool IsTargetUrl()
     {
-        var currentUri = new Uri(view.GetCurrentAddress());
+        var currentUri = new Uri(_view.GetCurrentAddress());
         return currentUri.GetLeftPart(UriPartial.Query) == TargetUrl;
     }
 
@@ -86,25 +86,25 @@ public class WebViewWrapper : IWebViewWrapper
         {
             if (!IsTargetUrl())
             {
-                logger.Debug($"Waiting for {TargetUrl}, got {view.GetCurrentAddress()}");
+                _logger.Debug($"Waiting for {TargetUrl}, got {_view.GetCurrentAddress()}");
                 return;
             }
 
-            var source = await view.GetPageSourceAsync();
+            var source = await _view.GetPageSourceAsync();
             if (IsAuthenticated(source))
             {
                 DownloadCompletionSource?.TrySetResult(source);
-                logger.Debug($"Completed request for {TargetUrl}");
+                _logger.Debug($"Completed request for {TargetUrl}");
             }
             else
             {
-                logger.Debug($"Source for {TargetUrl} is not authenticated");
+                _logger.Debug($"Source for {TargetUrl} is not authenticated");
                 return;
             }
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error trying to navigate to " + TargetUrl);
+            _logger.Error(ex, "Error trying to navigate to " + TargetUrl);
         }
     }
 
@@ -114,13 +114,13 @@ public class WebViewWrapper : IWebViewWrapper
         {
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                view.Close();
-                view.Dispose();
+                _view.Close();
+                _view.Dispose();
             });
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error disposing WebViewWrapper");
+            _logger.Error(ex, "Error disposing WebViewWrapper");
         }
     }
 }
