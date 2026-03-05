@@ -244,16 +244,10 @@ public class LaunchBoxMetadataProvider(MetadataRequestOptions options, LaunchBox
             selected = plugin.PlayniteApi.Dialogs.ChooseImageFile(images, caption);
 
         if (selected == null)
-        {
             return null;
-        }
-        else
-        {
-            var selectedImageDetails = ((LaunchBoxImageFileOption)selected).ImageDetails;
-            var task = ScaleImageAsync(selectedImageDetails, imgSettings);
-            task.Wait();
-            return task.Result;
-        }
+
+        var selectedImageDetails = ((LaunchBoxImageFileOption)selected).ImageDetails;
+        return Task.Run(async () => await ScaleImageAsync(selectedImageDetails, imgSettings)).GetAwaiter().GetResult();
     }
 
     private List<ImageFileOption> GetImageOptions(LaunchBoxImageSourceSettings imgSettings)

@@ -4,6 +4,7 @@ using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GamesSizeCalculator;
 
@@ -25,7 +26,7 @@ public class InstallSizeProvider(Game game, IPlayniteAPI playniteApi, ICollectio
     {
         try
         {
-            var sizeTask = sizeCalculator.GetInstallSizeAsync(Game);
+            var sizeTask = Task.Run(async () => await sizeCalculator.GetInstallSizeAsync(Game));
             if (sizeTask.Wait(7000))
                 return sizeTask.Result ?? 0L;
 
@@ -38,7 +39,7 @@ public class InstallSizeProvider(Game game, IPlayniteAPI playniteApi, ICollectio
             PlayniteApi.Notifications.Add(
                 new NotificationMessage("GetOnlineSizeError" + Game?.Id,
                                         string.Format(ResourceProvider.GetString("LOCGame_Sizes_Calculator_NotificationMessageErrorGetOnlineSize"), sizeCalculator?.ServiceName, Game?.Name, e.Message),
-                    NotificationType.Error));
+                                        NotificationType.Error));
             return 0UL;
         }
     }
@@ -61,7 +62,7 @@ public class InstallSizeProvider(Game game, IPlayniteAPI playniteApi, ICollectio
             alreadyRan.Add(sizeCalculator);
             if (size != 0)
                 break;
-            }
+        }
 
         //go through every size calculator as a fallback
         if (size == 0)
@@ -74,8 +75,8 @@ public class InstallSizeProvider(Game game, IPlayniteAPI playniteApi, ICollectio
                 size = GetInstallSize(sizeCalculator);
                 if (size != 0)
                     break;
-                }
             }
+        }
 
         return size;
     }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace MutualGames.Models.Settings;
@@ -72,8 +73,7 @@ public class FriendSourceSettings : ObservableObject
 
     [DontSerialize] public IFriendsGamesClient Client { get; set; }
 
-    [DontSerialize]
-    public bool IsAuthenticated => Client.IsAuthenticatedAsync().Result;
+    [DontSerialize] public bool IsAuthenticated => Task.Run(async () => await Client.IsAuthenticatedAsync()).GetAwaiter().GetResult();
 
     [DontSerialize] public string HeaderText => $"{Name} ({Friends.Count} friends)";
 

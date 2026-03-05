@@ -46,7 +46,7 @@ public class BigFishSearchProvider(IWebDownloader downloader, BigFishMetadataSet
     {
         if (searchResult == null) return null;
 
-        var reviewFetchTask = GetCommunityScoreAsync(searchResult);
+        var reviewFetchTask = Task.Run(async () => await GetCommunityScoreAsync(searchResult));
         var productDetails = _service.GetProductDetails(searchResult.UrlKey).products.items.First();
 
         var output = new GameDetails
@@ -117,7 +117,7 @@ public class BigFishSearchProvider(IWebDownloader downloader, BigFishMetadataSet
             output.Description = description.ToString();
         }
 
-        output.CommunityScore = reviewFetchTask.Result;
+        output.CommunityScore = reviewFetchTask.GetAwaiter().GetResult();
 
         return output;
     }

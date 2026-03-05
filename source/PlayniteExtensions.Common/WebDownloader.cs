@@ -61,7 +61,8 @@ public class WebDownloader : IWebDownloader
         string contentType = null, bool throwExceptionOnErrorResponse = true, int maxRedirectDepth = 7, CancellationToken cancellationToken = default, bool getContent = true)
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        var output = DownloadStringAsync(url, redirectUrlGetFunc, jsCookieGetFunc, referer, headerSetter, contentType, throwExceptionOnErrorResponse, maxRedirectDepth, 0, cancellationToken, getContent).Result;
+        var output = Task.Run(async () => await DownloadStringAsync(url, redirectUrlGetFunc, jsCookieGetFunc, referer, headerSetter, contentType, throwExceptionOnErrorResponse, maxRedirectDepth, 0, cancellationToken, getContent))
+                         .GetAwaiter().GetResult();
         sw.Stop();
         _logger.Info($"Call to {url} completed in {sw.Elapsed}, status: {output?.StatusCode}");
         return output;

@@ -16,8 +16,8 @@ public class ViveportMetadataProvider(IViveportApiClient viveportApiClient, Vive
 
     public override GameMetadata GetMetadata(Game game)
     {
-        var detailsTask = viveportApiClient.GetGameDetailsAsync(game.GameId);
-        var customAttributesTask = viveportApiClient.GetAttributesAsync();
+        var detailsTask = Task.Run(async () => await viveportApiClient.GetGameDetailsAsync(game.GameId));
+        var customAttributesTask = Task.Run(async () => await viveportApiClient.GetAttributesAsync());
 
         Task.WaitAll(detailsTask, customAttributesTask);
 

@@ -5,6 +5,7 @@ using Playnite.SDK;
 using Playnite.SDK.Data;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace GamesSizeCalculator.Common.Steam;
@@ -40,7 +41,7 @@ class SteamWeb
     public static List<StoreSearchResult> GetSteamSearchResults(string searchTerm, string steamApiCountry = null)
     {
         var results = new List<StoreSearchResult>();
-        var searchPageSrc = HttpDownloader.DownloadStringAsync(GetStoreSearchUrl(searchTerm, steamApiCountry)).GetAwaiter().GetResult();
+        var searchPageSrc = Task.Run(async () => await HttpDownloader.DownloadStringAsync(GetStoreSearchUrl(searchTerm, steamApiCountry))).GetAwaiter().GetResult();
         if (!string.IsNullOrEmpty(searchPageSrc))
         {
             var searchPage = new HtmlParser().Parse(searchPageSrc);
@@ -89,7 +90,7 @@ class SteamWeb
     public static SteamAppDetails GetSteamAppDetails(string steamId)
     {
         var url = $"https://store.steampowered.com/api/appdetails?appids={steamId}";
-        var downloadedString = HttpDownloader.DownloadStringAsync(url).GetAwaiter().GetResult();
+        var downloadedString = Task.Run(async () => await HttpDownloader.DownloadStringAsync(url)).GetAwaiter().GetResult();
         if (!string.IsNullOrEmpty(downloadedString))
         {
             var parsedData = Serialization.FromJson<Dictionary<string, SteamAppDetails>>(downloadedString);

@@ -78,12 +78,11 @@ public class BigFishOnlineLibraryScraper(IPlayniteAPI playniteApi, IWebDownloade
     private static string GetToken(IWebView webView)
     {
         const string script = "window.localStorage['M2_VENIA_BROWSER_PERSISTENCE__signin_token']";
-        var scriptTask = ExecuteJavaScriptOnPage(webView, OrderHistoryUrl, script, maxAttempts: 2, millisecondsExtraDelay: 3500);
-        scriptTask.Wait();
-        if (scriptTask.Result == null)
+        var scriptResult = Task.Run(async () => await ExecuteJavaScriptOnPage(webView, OrderHistoryUrl, script, maxAttempts: 2, millisecondsExtraDelay: 3500)).GetAwaiter().GetResult();
+        if (scriptResult == null)
             return null;
 
-        var resultDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(scriptTask.Result.ToString());
+        var resultDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(scriptResult.ToString());
         if (resultDict.TryGetValue("value", out var value))
             return value.ToString().Trim('"');
 

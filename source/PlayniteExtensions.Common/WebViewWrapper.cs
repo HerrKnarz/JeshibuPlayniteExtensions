@@ -43,8 +43,8 @@ public class OffScreenWebViewWrapper : IWebViewWrapper
     private readonly SemaphoreSlim semaphore = new(1, 1);
     private readonly AsyncAutoResetEvent loadCompleteEvent = new();
 
-    public WebViewResponse DownloadPageSource(string url) => DownloadPageSourceAsync(url).Result;
-    public WebViewResponse DownloadPageText(string url) => DownloadPageTextAsync(url).Result;
+    public WebViewResponse DownloadPageSource(string url) => Task.Run(async () => await DownloadPageSourceAsync(url)).GetAwaiter().GetResult();
+    public WebViewResponse DownloadPageText(string url) => Task.Run(async () => await DownloadPageTextAsync(url)).GetAwaiter().GetResult();
 
     public async Task<WebViewResponse> DownloadPageSourceAsync(string url) => await DownloadPageContentAsync(url, v => v.GetPageSource());
 
