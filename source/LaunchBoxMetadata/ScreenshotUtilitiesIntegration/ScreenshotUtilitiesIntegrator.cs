@@ -37,7 +37,10 @@ public class ScreenshotUtilitiesIntegrator(LaunchBoxMetadata plugin, LaunchBoxMe
         {
             var foundGame = LaunchBoxHelper.FindGameInBackground(new LaunchBoxDatabase(plugin.GetPluginUserDataPath()), game, platformUtility);
 
-            searchUrl = scraper.GetLaunchBoxGamesDatabaseUrl(foundGame.DatabaseID);
+            if (foundGame.DatabaseID != default)
+            {
+                searchUrl = scraper.GetLaunchBoxGamesDatabaseUrl(foundGame.DatabaseID);
+            }
         }
 
         return searchUrl;
