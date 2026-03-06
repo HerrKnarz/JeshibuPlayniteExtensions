@@ -62,7 +62,7 @@ public class WebDownloader : IWebDownloader
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
-        var output = AsyncHelper.RunSync(async () => await DownloadStringAsync(url, redirectUrlGetFunc, jsCookieGetFunc, referer, headerSetter, contentType, throwExceptionOnErrorResponse, maxRedirectDepth, 0, cancellationToken, getContent));
+        var output = AsyncHelper.RunSync(() => DownloadStringAsync(url, redirectUrlGetFunc, jsCookieGetFunc, referer, headerSetter, contentType, throwExceptionOnErrorResponse, maxRedirectDepth, 0, cancellationToken, getContent));
 
         sw.Stop();
         _logger.Info($"Call to {url} completed in {sw.Elapsed}, status: {output?.StatusCode}");
@@ -335,16 +335,15 @@ public static class CookieContainerExtensions
 
 public static class AsyncHelper
 {
-    private static readonly TaskFactory MyTaskFactory = new
-        TaskFactory(CancellationToken.None,
+    private static readonly TaskFactory MyTaskFactory = new(CancellationToken.None,
             TaskCreationOptions.None,
             TaskContinuationOptions.None,
             TaskScheduler.Default);
-
+    
     public static TResult RunSync<TResult>(Func<Task<TResult>> func)
     {
         return MyTaskFactory
-            .StartNew(func)
+            .StartNew(async () => await func())
             .Unwrap()
             .GetAwaiter()
             .GetResult();
@@ -353,7 +352,7 @@ public static class AsyncHelper
     public static void RunSync(Func<Task> func)
     {
         MyTaskFactory
-            .StartNew(func)
+            .StartNew(async () => await func())
             .Unwrap()
             .GetAwaiter()
             .GetResult();
