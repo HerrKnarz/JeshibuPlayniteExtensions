@@ -98,7 +98,7 @@ public class EaLibraryDataGatherer(IEaWebsite website, IRegistryValueProvider re
         };
     }
 
-    private Dictionary<string, LegacyOffer> GetLegacyOffers(IEnumerable<string> offerIds) => GetLegacyOffersAsync(offerIds).Result;
+    private Dictionary<string, LegacyOffer> GetLegacyOffers(IEnumerable<string> offerIds) => Task.Run(async () => await GetLegacyOffersAsync(offerIds)).GetAwaiter().GetResult();
 
     private async Task<Dictionary<string, LegacyOffer>> GetLegacyOffersAsync(IEnumerable<string> offerIds)
     {

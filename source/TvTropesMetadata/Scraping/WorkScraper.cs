@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Playnite.SDK;
+using System.Threading.Tasks;
 
 namespace TvTropesMetadata.Scraping;
 
@@ -19,8 +20,8 @@ public class WorkScraper(IWebViewFactory webViewFactory) : BaseScraper(webViewFa
         var directUrlResult = GetBasicPageInfo(query);
         if (directUrlResult != null)
             return [directUrlResult];
-        
-        var results = GoogleSearch(query).Result.ToList();
+
+        var results = Task.Run(async () => await GoogleSearch(query)).GetAwaiter().GetResult().ToList();
         results.RemoveAll(sr => !MatchesBreadCrumbs(sr) && !MatchesUrlCategory(sr));
         return results.OrderByDescending(sr => UrlBelongsToWhitelistedWorkCategory(sr.Url));
     }

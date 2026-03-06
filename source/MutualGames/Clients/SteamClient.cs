@@ -24,7 +24,7 @@ public class SteamClient(IPlayniteAPI playniteApi) : IFriendsGamesClient
     {
         if (_accessTokenExpires < DateTime.Now)
         {
-            _accessToken = _storeService.GetAccessTokenAsync().Result.AccessToken;
+            _accessToken = Task.Run(_storeService.GetAccessTokenAsync).GetAwaiter().GetResult().AccessToken;
             _accessTokenExpires = DateTime.Now.AddHours(2);
         }
 

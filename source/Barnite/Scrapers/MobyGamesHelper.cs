@@ -109,7 +109,7 @@ public class MobyGamesHelper(IPlatformUtility platformUtility) : MobyGamesIdUtil
             }
         }
 
-        var criticScoreString = page.DocumentNode.SelectSingleNode("//dt[text()='Critics']/following-sibling::dd")?.ChildNodes.FirstOrDefault(n => n.NodeType == HtmlNodeType.Text).InnerText.HtmlDecode().TrimEnd('%');
+        var criticScoreString = page.DocumentNode.SelectSingleNode("//dt[text()='Critics']/following-sibling::dd")?.ChildNodes.FirstOrDefault(n => n.NodeType == HtmlNodeType.Text)?.InnerText.HtmlDecode().TrimEnd('%');
         if (criticScoreString != null && int.TryParse(criticScoreString, out int criticScore))
             data.CriticScore = criticScore;
 
@@ -132,9 +132,9 @@ public class MobyGamesHelper(IPlatformUtility platformUtility) : MobyGamesIdUtil
         return data;
     }
 
-    private readonly Regex WhiteSpaceRegex = new(@"\s+", RegexOptions.Compiled);
+    private readonly Regex _whiteSpaceRegex = new(@"\s+", RegexOptions.Compiled);
 
-    private string NormalizeHtmlWhitespace(string input) => WhiteSpaceRegex.Replace(input, " ");
+    private string NormalizeHtmlWhitespace(string input) => _whiteSpaceRegex.Replace(input, " ");
 
     private IEnumerable<Link> GetLinks(HtmlDocument page)
     {

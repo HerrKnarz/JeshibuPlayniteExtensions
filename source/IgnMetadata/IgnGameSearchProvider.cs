@@ -6,6 +6,7 @@ using Playnite.SDK;
 using Playnite.SDK.Models;
 using PlayniteExtensions.Common;
 using PlayniteExtensions.Metadata.Common;
+using System;
 
 namespace IgnMetadata;
 
@@ -36,17 +37,29 @@ public class IgnGameSearchProvider(IgnApiClient client, IPlatformUtility platfor
             AgeRatings = ignDetails.AgeRatings.ToList(),
             Platforms = ignDetails.Platforms.SelectMany(platformUtility.GetPlatforms).ToList(),
             ReleaseDate = ignDetails.ReleaseDate,
+            CriticScore = Get100Score(ignDetails.PrimaryReview?.Score),
         };
         gameDetails.Links.Add(new Link("IGN", $"https://www.ign.com/games/{slug}"));
 
-        if (ignDetails?.PrimaryImage?.Url != null)
+        if (ignDetails.PrimaryImage?.Url != null)
             gameDetails.CoverOptions.Add(new BasicImage(ignDetails.PrimaryImage.Url));
 
         var backgrounds = client.GetImages(searchResult.Slug)?.Select(i => new BasicImage(i));
         if (backgrounds != null)
             gameDetails.BackgroundOptions.AddRange(backgrounds);
 
+        var userReviews = client.GetUserReviewAnalytics(searchResult.Id);
+        gameDetails.CommunityScore = Get100Score(userReviews?.Score);
+
         return gameDetails;
+    }
+
+    private static int? Get100Score(double? score)
+    {
+        if (score == null)
+            return null;
+
+        return Convert.ToInt32(score * 10D);
     }
 
     private static List<string> GetNames(IgnAttribute[] ignAttributes)
@@ -58,16 +71,13 @@ public class IgnGameSearchProvider(IgnApiClient client, IPlatformUtility platfor
 
     public GenericItemOption<IgnGame> ToGenericItemOption(IgnGame item)
     {
-        var description = item.ReleaseDateString ?? string.Empty;
-        var platforms = item.Platforms;
-        if (platforms != null)
-            foreach (var platform in platforms)
-            {
-                if (description.Length > 0)
-                    description += " | ";
-                description += platform;
-            }
-        return new GenericItemOption<IgnGame>(item) { Name = item.Name, Description = description };
+        var descriptionItems = new List<string>();
+        if (item.ReleaseDateString != null)
+            descriptionItems.Add(item.ReleaseDateString);
+
+        descriptionItems.AddRange(item.Platforms);
+
+        return new(item) { Name = item.Name, Description = string.Join(" | ", descriptionItems) };
     }
 
     public bool TryGetDetails(Game game, out GameDetails gameDetails, CancellationToken cancellationToken)

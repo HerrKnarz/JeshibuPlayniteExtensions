@@ -24,7 +24,7 @@ public class ScraperManager
 
     public IEnumerable<XboxGameSearchResultItem> Search(XboxMetadataSettings settings, Game game, string searchString, bool onlyExactMatches = false)
     {
-        var tasks = Scrapers.Values.OrderBy(s => s.ExecutionOrder).Select(s => s.SearchAsync(settings, searchString)).ToArray();
+        var tasks = Scrapers.Values.OrderBy(s => s.ExecutionOrder).Select(s => Task.Run(async () => await s.SearchAsync(settings, searchString))).ToArray();
         var snc = new SortableNameConverter();
         var searchNameNormalized = snc.Convert(searchString, removeEditions: true).Deflate();
         Task.WaitAll(tasks, 30000);
@@ -58,6 +58,7 @@ public class ScraperManager
             output.AddRange(titleContained);
             output.AddRange(otherSearchResults);
         }
+
         return output;
     }
 
@@ -82,6 +83,7 @@ public class ScraperManager
                 }
             }
         }
+
         return false;
     }
 
@@ -89,9 +91,7 @@ public class ScraperManager
     {
         var scraper = Scrapers[searchResultItem.ScraperKey];
         var url = scraper.FixUrl(searchResultItem.Url);
-        var task = scraper.GetDetailsAsync(settings, searchResultItem.Id, url);
-        task.Wait();
-        return task.Result;
+        return Task.Run(async () => await scraper.GetDetailsAsync(settings, searchResultItem.Id, url)).GetAwaiter().GetResult();
     }
 
     private void Initialize(IEnumerable<BaseXboxScraper> scrapers)
@@ -106,12 +106,11 @@ public class ScraperManager
     {
         var baseType = typeof(T);
         return Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(t =>
-                t != baseType &&
-                baseType.IsAssignableFrom(t) &&
-                t.GetConstructor([typeof(IWebDownloader), typeof(IPlatformUtility)]) != null
-                ).ToList();
-
+                       .GetTypes()
+                       .Where(t =>
+                                  t != baseType &&
+                                  baseType.IsAssignableFrom(t) &&
+                                  t.GetConstructor([typeof(IWebDownloader), typeof(IPlatformUtility)]) != null
+                       ).ToList();
     }
 }

@@ -16,8 +16,8 @@ public class ViveportMetadataProvider(IViveportApiClient viveportApiClient, Vive
 
     public override GameMetadata GetMetadata(Game game)
     {
-        var detailsTask = viveportApiClient.GetGameDetailsAsync(game.GameId);
-        var customAttributesTask = viveportApiClient.GetAttributesAsync();
+        var detailsTask = Task.Run(async () => await viveportApiClient.GetGameDetailsAsync(game.GameId));
+        var customAttributesTask = Task.Run(async () => await viveportApiClient.GetAttributesAsync());
 
         Task.WaitAll(detailsTask, customAttributesTask);
 
@@ -59,6 +59,7 @@ public class ViveportMetadataProvider(IViveportApiClient viveportApiClient, Vive
             metadata.Publishers = [new MetadataNameProperty(publisher.TrimCompanyForms())];
 
         #region platforms
+
         if (settings.ImportHeadsetsAsPlatforms)
             metadata.Platforms = GetCustomAttributeMetadataProperties(appDetails.HardwareMatrix?.Headsets, customAttributes, "headsets", opt => opt.AdminLabel);
         else
@@ -74,6 +75,7 @@ public class ViveportMetadataProvider(IViveportApiClient viveportApiClient, Vive
                     logger.Warn($"Unknown OS: {os}");
             }
         }
+
         #endregion platforms
 
         var biggestImage = appDetails.Gallery
@@ -162,12 +164,5 @@ public class ViveportMetadataProvider(IViveportApiClient viveportApiClient, Vive
         };
     }
 
-    private static DateTime GetDateFromMilliseconds(long milliseconds)
-    {
-        return new DateTime(1970, 1, 1).AddMilliseconds(milliseconds);
-    }
-    private static DateTime GetDateFromSeconds(long seconds)
-    {
-        return new DateTime(1970, 1, 1).AddSeconds(seconds);
-    }
+    private static DateTime GetDateFromMilliseconds(long milliseconds) => new DateTime(1970, 1, 1).AddMilliseconds(milliseconds);
 }

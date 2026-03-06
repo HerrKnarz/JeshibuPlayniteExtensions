@@ -36,7 +36,15 @@ public class IgnApiClient(IWebDownloader downloader)
         var variables = new { slug, objectType = "Game", count = 10 };
         var data = Call<IgnGetImagesResultData>("ObjectImageGallery", variables, "06204b0f0871f8382e3adab7d1c59399e6c17ac94bff575c20a12ebf9d880b86");
 
-        return data?.ImageGallery?.Images.Select(i => i.Url);
+        return data?.ObjectSelectByTypeAndSlug.ImageGallery?.Images.Select(i => i.Url);
+    }
+
+    public UserReviewAnalytics GetUserReviewAnalytics(string objectId)
+    {
+        var variables = new { objectId, feedbackCount = 0, recentReviewActivityCount = 0 };
+        var data = Call<UserReviewDataRoot>("UserReviewAnalytics", variables, "1af10aeda984ad7cee331faa63050e3c0a7d60fada216a65c52c0dbe8f1c6610");
+
+        return data?.UserReviewAnalytics;
     }
 
     private T Call<T>(string operationName, object variables, string hash) where T: class

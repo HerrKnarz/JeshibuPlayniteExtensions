@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Playnite.SDK;
+using System.Threading.Tasks;
 
 namespace TvTropesMetadata.Scraping;
 
@@ -42,10 +43,10 @@ public class TropeScraper(IWebViewFactory webViewFactory) : BaseScraper(webViewF
         var directUrlResult = GetBasicPageInfo(query);
         if (directUrlResult != null)
             return [directUrlResult];
-        
-        var results = GoogleSearch(query).Result.ToList();
+
+        var results = Task.Run(async () => await GoogleSearch(query)).GetAwaiter().GetResult().ToList();
         results.RemoveAll(sr => sr.Breadcrumbs.Count != 1 || sr.Breadcrumbs[0] != "Tropes");
-        
+
         return results;
     }
 
