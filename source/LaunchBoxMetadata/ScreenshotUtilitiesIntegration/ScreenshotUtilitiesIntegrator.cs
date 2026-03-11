@@ -70,9 +70,7 @@ public class ScreenshotUtilitiesIntegrator(LaunchBoxMetadata plugin, LaunchBoxMe
 
             foreach (var image in filteredimageDetails)
             {
-                var mediaType = MediaType.Screenshot;
-
-                mediaType = image.Type.Contains("Screenshot") ? MediaType.Screenshot
+                var mediaType = image.Type.Contains("Screenshot") ? MediaType.Screenshot
                     : image.Type.Contains("Advertisement") ? MediaType.Advertisement
                     : image.Type.Contains("Background") ? MediaType.Background
                     : image.Type.Contains("Banner") ? MediaType.Banner
